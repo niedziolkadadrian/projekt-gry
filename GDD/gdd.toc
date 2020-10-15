@@ -1,4 +1,6 @@
-\babel@toc {polish}{}
 \contentsline {section}{\numberline {1}Wprowadzenie}{3}{}%
 \contentsline {section}{\numberline {2}O grze}{3}{}%
-\contentsline {section}{\numberline {3}Grafika}{3}{}%
+\contentsline {section}{\numberline {3}Fabuła}{3}{}%
+\contentsline {section}{\numberline {4}Mechaniki}{3}{}%
+\contentsline {section}{\numberline {5}Świat}{3}{}%
+\contentsline {section}{\numberline {6}Grafika}{3}{}%
