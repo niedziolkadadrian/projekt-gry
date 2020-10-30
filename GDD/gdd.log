@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.10) (preloaded format=pdflatex 2020.10.18)  24 OCT 2020 16:52
+This is pdfTeX, Version 3.14159265-2.6-1.40.21 (MiKTeX 20.10) (preloaded format=pdflatex 2020.10.18)  30 OCT 2020 14:26
 entering extended mode
 **./gdd.tex
 (gdd.tex
@@ -138,12 +138,17 @@ Underfull \hbox (badness 10000) in paragraph at lines 50--52
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 59--63
+Underfull \hbox (badness 10000) in paragraph at lines 59--65
 
  []
 
 
-Underfull \hbox (badness 10000) in paragraph at lines 59--63
+Underfull \hbox (badness 10000) in paragraph at lines 59--65
+
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 59--65
 
  []
 
@@ -151,7 +156,7 @@ Underfull \hbox (badness 10000) in paragraph at lines 59--63
 Here is how much of TeX's memory you used:
  672 strings out of 480236
  10584 string characters out of 2893773
- 276403 words of memory out of 3000000
+ 277403 words of memory out of 3000000
  17270 multiletter control sequences out of 15000+200000
  542453 words of font info for 47 fonts, out of 3000000 for 9000
  1141 hyphenation exceptions out of 8191
@@ -162,7 +167,7 @@ eX/MiKTeX/fonts/enc/dvips/pl/plrm.enc}<D:/_LateX/MiKTeX/fonts/type1/public/pl/p
 lbx12.pfb><D:/_LateX/MiKTeX/fonts/type1/public/pl/plr12.pfb><D:/_LateX/MiKTeX/f
 onts/type1/public/pl/plr17.pfb><D:/_LateX/MiKTeX/fonts/type1/public/pl/plti12.p
 fb>
-Output written on gdd.pdf (5 pages, 43081 bytes).
+Output written on gdd.pdf (5 pages, 43250 bytes).
 PDF statistics:
  41 PDF objects out of 1000 (max. 8388607)
  0 named destinations out of 1000 (max. 500000)
