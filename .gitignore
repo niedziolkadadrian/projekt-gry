@@ -1,0 +1,5 @@
+#UE4 folders to ignore
+/GameProject/Binaries/
+/GameProject/DerivedDataCache/
+/GameProject/Intermediate/
+/GameProject/Saved/
