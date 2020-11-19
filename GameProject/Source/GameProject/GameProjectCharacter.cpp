@@ -8,6 +8,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
+#include "SignwText.h"
+#include "UI/InGameHUD.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AGameProjectCharacter
@@ -45,6 +47,15 @@ AGameProjectCharacter::AGameProjectCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named MyCharacter (to avoid direct content references in C++)
+
+	TriggerCapsule = CreateDefaultSubobject<UCapsuleComponent>(TEXT("TriggerCapsule"));
+	TriggerCapsule->InitCapsuleSize(42.f, 96.0f);
+	TriggerCapsule->SetCollisionProfileName(TEXT("Trigger"));
+	TriggerCapsule->SetupAttachment(RootComponent);
+
+	TriggerCapsule->OnComponentBeginOverlap.AddDynamic(this,&AGameProjectCharacter::OnOverlapBegin);
+	TriggerCapsule->OnComponentEndOverlap.AddDynamic(this, &AGameProjectCharacter::OnOverlapEnd);
+
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -56,6 +67,9 @@ void AGameProjectCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	check(PlayerInputComponent);
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+
+	//Akcje
+	PlayerInputComponent->BindAction("Interact", IE_Pressed,  this, &AGameProjectCharacter::Interact);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGameProjectCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGameProjectCharacter::MoveRight);
@@ -132,3 +146,57 @@ void AGameProjectCharacter::MoveRight(float Value)
 		AddMovementInput(Direction, Value);
 	}
 }
+
+void AGameProjectCharacter::Interact(){
+	if(OverlappedInteractActors.Num()){
+		if(GEngine)
+      		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Interacted"));
+	}else{
+		if(GEngine)
+      		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("OpeningInventory"));
+	}
+	 
+}
+
+
+void AGameProjectCharacter::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, 
+class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{	
+	if(GetWorld()->GetTimerManager().IsTimerActive(FadeTimerHandle)){
+		GetWorld()->GetTimerManager().PauseTimer(FadeTimerHandle);
+	}
+	if(OtherActor && (OtherActor != this) && OtherComp){
+		if(OtherActor->IsA(ASignwText::StaticClass())){
+			OverlappedInteractActors.Add(OtherActor);
+			AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+			if(InGameHUD){
+				CurrentComboCount+=1;
+				InGameHUD->UpdateComboCount(CurrentComboCount);
+			}
+		}
+	}
+}
+
+void AGameProjectCharacter::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, 
+class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{	
+	if(OtherActor->IsA(ASignwText::StaticClass())){
+		OverlappedInteractActors.Remove(OtherActor);
+		if(!GetWorld()->GetTimerManager().IsTimerActive(FadeTimerHandle)){
+			GetWorld()->GetTimerManager().SetTimer(FadeTimerHandle, this, &AGameProjectCharacter::HideDialogWidget,.5f,false);
+		}
+		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+		if(InGameHUD){
+			InGameHUD->PlayDialogFadeAnim();
+		}
+	}
+	
+}
+
+void AGameProjectCharacter::HideDialogWidget(){
+	AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+	if(InGameHUD){
+		InGameHUD->ResetComboCount();
+	}
+}
+
