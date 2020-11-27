@@ -5,6 +5,10 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Engine/EngineTypes.h"
+#include "Interfaces/InteractInterface.h"
+#include "UI/InGameHUD.h"
+#include "Items/ItemBase.h"
+#include "mComponents/InventoryComponent.h"
 
 #include "GameProjectCharacter.generated.h"
 
@@ -21,8 +25,12 @@ class AGameProjectCharacter : public ACharacter
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UCameraComponent* FollowCamera;
 
-	UPROPERTY(VisibleAnywhere, Category="Trigger Capsule")
+	//Trigger capsule
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Trigger Capsule", meta = (AllowPrivateAccess = "true"))
 	class UCapsuleComponent* TriggerCapsule;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Inventory", meta = (AllowPrivateAccess = "true"))
+	class UInventoryComponent* Inventory;
 public:
 	AGameProjectCharacter();
 
@@ -73,24 +81,37 @@ protected:
 	// APawn interface
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 	// End of APawn interface
-private:
-	UFUNCTION()
-	void HideDialogWidget();
 public:
 	/** Returns CameraBoom subobject **/
 	FORCEINLINE class USpringArmComponent* GetCameraBoom() const { return CameraBoom; }
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
-	UPROPERTY(EditAnywhere)
-	int32 CurrentComboCount;
+//-------------------------------------------------------------------------------------
+	UPROPERTY(EditAnywhere, Category="Debug")
+	bool ShowDebugLine;
 
-	FTimerHandle FadeTimerHandle;
+	//zegar dla sprawdzania na co patrzy się postać, gdy OverlappedInteractActors > 0
+	FTimerHandle LTraceTimerHandle;
 
 	//Wywoływane w momencie nacisnięcia przycisku interakcji
 	void Interact();
+
+	UPROPERTY(EditAnywhere, BluePrintReadOnly, Category="Needs")
+	float Hunger;
+
+	UFUNCTION(BlueprintCallable, Category="Item")
+	void UseItem(class UItemBase* Item);
 private:
-	TArray<AActor*> OverlappedInteractActors;
+
+	uint8 OverlappedInteractActors;
+	AActor* FocusedActor;
+	bool IsInvOpen;
+
+	UFUNCTION()
+	void TraceLine();
+
+	void OpenCloseInventory();
 
 };
 

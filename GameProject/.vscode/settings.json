@@ -1,0 +1,9 @@
+{
+	"files.exclude": {
+		"D:/_GameProject/GameProject/.vscode": true,
+		"D:/_GameProject/GameProject/Content": true,
+		"D:/_GameProject/GameProject/DerivedDataCache": true,
+		"D:/_GameProject/GameProject/Intermediate": true,
+		"D:/_GameProject/GameProject/Saved": true
+	}
+}

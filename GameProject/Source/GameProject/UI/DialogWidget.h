@@ -20,8 +20,8 @@ public:
 
 	virtual void NativeConstruct() override;
 
-	void UpdateComboCount(int32 Value);
-	void ResetComboCount();
+	void ShowDialog(FText Value);
+	void HideDialog();
 	void PlayDialogFadeAnim();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))

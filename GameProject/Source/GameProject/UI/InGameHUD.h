@@ -7,6 +7,8 @@
 #include "Components/WidgetComponent.h"
 
 #include "DialogWidget.h"
+#include "HintWidget.h"
+#include "InventoryWidget.h"
 
 #include "InGameHUD.generated.h"
 
@@ -26,16 +28,20 @@ public:
 
 	virtual void Tick(float deltaSeconds) override;
 
-	UFUNCTION()
-	void UpdateComboCount(int32 Value);
-	UFUNCTION()
-	void ResetComboCount();
-	UFUNCTION()
-	void PlayDialogFadeAnim();
-
 	UPROPERTY(EditDefaultsOnly, Category="Widgets")
 	TSubclassOf<UUserWidget> DialogWidgetClass;
 
+	UPROPERTY(EditDefaultsOnly, Category="Widgets")
+	TSubclassOf<UUserWidget> HintWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category="Widgets")
+	TSubclassOf<UUserWidget> InventoryWidgetClass;
+	
+	UDialogWidget* GetDialogWidget();
+	UHintWidget* GetHintWidget();
+	UInventoryWidget* GetInventoryWidget();
 private:
 	UDialogWidget* dialogWidget;
+	UHintWidget* hintWidget;
+	UInventoryWidget* inventoryWidget;
 };

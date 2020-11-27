@@ -15,6 +15,18 @@ void AInGameHUD::BeginPlay(){
             dialogWidget->AddToViewport();
         }
     }
+    if(HintWidgetClass){
+        hintWidget = CreateWidget<UHintWidget>(GetWorld(),HintWidgetClass);
+        if(hintWidget){
+            hintWidget->AddToViewport();
+        }
+    }
+    if(InventoryWidgetClass){
+        inventoryWidget = CreateWidget<UInventoryWidget>(GetWorld(),InventoryWidgetClass);
+        if(inventoryWidget){
+            inventoryWidget->AddToViewport();
+        }
+    }
 }
 
 void AInGameHUD::Tick(float deltaSeconds){
@@ -25,20 +37,21 @@ void AInGameHUD::DrawHUD(){
     Super::DrawHUD();
 }
 
-void AInGameHUD::UpdateComboCount(int32 Value){
-    if(dialogWidget){
-        dialogWidget->UpdateComboCount(Value);
-    }
+
+UDialogWidget* AInGameHUD::GetDialogWidget(){
+    if(dialogWidget)
+        return dialogWidget;
+    return nullptr;
 }
 
-void AInGameHUD::ResetComboCount(){
-     if(dialogWidget){
-        dialogWidget->ResetComboCount();
-    }
+UHintWidget* AInGameHUD::GetHintWidget(){
+    if(hintWidget)
+        return hintWidget;
+    return nullptr;
 }
 
-void AInGameHUD::PlayDialogFadeAnim(){
-     if(dialogWidget){
-        dialogWidget->PlayDialogFadeAnim();
-    }
+UInventoryWidget* AInGameHUD::GetInventoryWidget(){
+     if(inventoryWidget)
+        return inventoryWidget;
+    return nullptr;
 }

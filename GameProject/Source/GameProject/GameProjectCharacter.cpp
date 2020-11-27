@@ -8,8 +8,9 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
 #include "GameFramework/SpringArmComponent.h"
-#include "SignwText.h"
-#include "UI/InGameHUD.h"
+
+
+#include "DrawDebugHelpers.h"
 
 //////////////////////////////////////////////////////////////////////////
 // AGameProjectCharacter
@@ -56,6 +57,14 @@ AGameProjectCharacter::AGameProjectCharacter()
 	TriggerCapsule->OnComponentBeginOverlap.AddDynamic(this,&AGameProjectCharacter::OnOverlapBegin);
 	TriggerCapsule->OnComponentEndOverlap.AddDynamic(this, &AGameProjectCharacter::OnOverlapEnd);
 
+	Inventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("PlayerInventory"));
+	Inventory->Size=FVector2D(9.f,4.f);
+
+	OverlappedInteractActors=0;
+	FocusedActor=nullptr;
+	IsInvOpen=false;
+
+	Hunger=100.f;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -148,12 +157,16 @@ void AGameProjectCharacter::MoveRight(float Value)
 }
 
 void AGameProjectCharacter::Interact(){
-	if(OverlappedInteractActors.Num()){
-		if(GEngine)
-      		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("Interacted"));
+	if(OverlappedInteractActors && FocusedActor){
+		IInteractInterface* InteractInt=Cast<IInteractInterface>(FocusedActor);
+		if(InteractInt && AActor::IsOverlappingActor(FocusedActor)){	//jeżeli ma on InteractInterface
+			InteractInt->Execute_OnInteract(FocusedActor, this);
+		}
+		else{		//jeżeli nie ma InteractInterface lub jestem poza zasięgiem
+			OpenCloseInventory();
+		}	
 	}else{
-		if(GEngine)
-      		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, TEXT("OpeningInventory"));
+		OpenCloseInventory();
 	}
 	 
 }
@@ -162,17 +175,14 @@ void AGameProjectCharacter::Interact(){
 void AGameProjectCharacter::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, 
 class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
 {	
-	if(GetWorld()->GetTimerManager().IsTimerActive(FadeTimerHandle)){
-		GetWorld()->GetTimerManager().PauseTimer(FadeTimerHandle);
-	}
 	if(OtherActor && (OtherActor != this) && OtherComp){
-		if(OtherActor->IsA(ASignwText::StaticClass())){
-			OverlappedInteractActors.Add(OtherActor);
-			AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-			if(InGameHUD){
-				CurrentComboCount+=1;
-				InGameHUD->UpdateComboCount(CurrentComboCount);
+		IInteractInterface* InteractInt=Cast<IInteractInterface>(OtherActor);
+		if(InteractInt){	//jeżeli ma InteractInterface
+			if(!OverlappedInteractActors){	//if it's first start checking what player is looking at
+				if(!GetWorld()->GetTimerManager().IsTimerActive(LTraceTimerHandle))
+					GetWorld()->GetTimerManager().SetTimer(LTraceTimerHandle, this, &AGameProjectCharacter::TraceLine,0.1f,true);
 			}
+			OverlappedInteractActors++;
 		}
 	}
 }
@@ -180,23 +190,88 @@ class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, con
 void AGameProjectCharacter::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, 
 class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 {	
-	if(OtherActor->IsA(ASignwText::StaticClass())){
-		OverlappedInteractActors.Remove(OtherActor);
-		if(!GetWorld()->GetTimerManager().IsTimerActive(FadeTimerHandle)){
-			GetWorld()->GetTimerManager().SetTimer(FadeTimerHandle, this, &AGameProjectCharacter::HideDialogWidget,.5f,false);
-		}
-		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-		if(InGameHUD){
-			InGameHUD->PlayDialogFadeAnim();
+	IInteractInterface* InteractInt=Cast<IInteractInterface>(OtherActor);
+	if(InteractInt){	//jeżeli ma InteractInterface
+		OverlappedInteractActors--;
+		if(!OverlappedInteractActors){	//if it's last stop checking what player is looking at
+			
+			if(GetWorld()->GetTimerManager().IsTimerActive(LTraceTimerHandle))
+				GetWorld()->GetTimerManager().PauseTimer(LTraceTimerHandle);
+		
+			if(FocusedActor){	//jeżeli był jakiś poprzednio patrzony aktor
+				IInteractInterface* FocusedInteractInt=Cast<IInteractInterface>(FocusedActor);
+				if(FocusedInteractInt){	//jeżeli miał on InteractInterface
+					FocusedInteractInt->Execute_EndFocus(FocusedActor);
+				}
+			}	
+			FocusedActor=nullptr;	//ustawiam FocusedActor na nullptr
 		}
 	}
 	
 }
 
-void AGameProjectCharacter::HideDialogWidget(){
-	AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-	if(InGameHUD){
-		InGameHUD->ResetComboCount();
+void AGameProjectCharacter::TraceLine(){
+	FVector Loc;
+	FRotator Rot;
+	FHitResult Hit;
+
+	GetController()->GetPlayerViewPoint(Loc, Rot);
+	FVector End=Loc+(Rot.Vector()*2000);
+
+	FCollisionQueryParams TraceParams;
+
+	bool IsHit=GetWorld()->LineTraceSingleByChannel(Hit,Loc,End,ECC_Visibility,TraceParams);
+
+	AActor* HittedActor=Hit.GetActor();
+	if(HittedActor){	//jeżeli cokolwiek trafiono
+		if(HittedActor != FocusedActor){	//jeżeli nowy aktor != poprzednio aktor na ktory sie patrzylem
+			if(FocusedActor){				//jeżeli był jakiś poprzednio patrzony aktor
+				IInteractInterface* InteractInt=Cast<IInteractInterface>(FocusedActor);
+				if(InteractInt){			//jeżeli miał InteractInterface
+					InteractInt->Execute_EndFocus(FocusedActor);
+				}
+			}
+			//nowo patrzony aktor
+			IInteractInterface* InteractInt=Cast<IInteractInterface>(HittedActor);
+			if(InteractInt && AActor::IsOverlappingActor(HittedActor)){	//jeżeli ma InteractInterface
+				InteractInt->Execute_StartFocus(HittedActor);
+			}
+			FocusedActor=HittedActor; //ustawiam FocusedActor na dowolnego typu nowy aktor
+		}
+	}
+	else{	//jeżeli nic nie trafiono
+		if(FocusedActor){	//jeżeli był jakiś poprzednio patrzony aktor
+			IInteractInterface* InteractInt=Cast<IInteractInterface>(FocusedActor);
+			if(InteractInt){	//jeżeli miał on InteractInterface
+				InteractInt->Execute_EndFocus(FocusedActor);
+			}
+		}	
+		FocusedActor=nullptr;	//ustawiam FocusedActor na nullptr
+	}
+	
+	if(ShowDebugLine)
+		DrawDebugLine(GetWorld(),Loc,End,FColor::Red,false,2.f);
+}
+
+void AGameProjectCharacter::OpenCloseInventory(){
+	if(!IsInvOpen){
+		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+		if(InGameHUD){
+			InGameHUD->GetInventoryWidget()->ShowInventory();
+		}
+		IsInvOpen=true;
+	}
+	else{
+		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+		if(InGameHUD){
+			InGameHUD->GetInventoryWidget()->HideInventory();
+		}
+		IsInvOpen=false;
 	}
 }
 
+void AGameProjectCharacter::UseItem(class UItemBase* Item){
+	if(Item){
+		Item->OnUse(this);
+	}
+}

@@ -1,0 +1,128 @@
+{
+	"version": "0.2.0",
+	"configurations": [
+		{
+			"name": "GameProject (Debug)",
+			"request": "launch",
+			"preLaunchTask": "GameProject Win64 Debug Build",
+			"program": "D:\\_GameProject\\GameProject\\Binaries\\Win64\\UE4-Win64-Debug.exe",
+			"args": [
+			],
+			"cwd": "D:\\UnrealEngine\\UE_4.25",
+			"stopAtEntry": false,
+			"externalConsole": true,
+			"type": "cppvsdbg",
+			"visualizerFile": "D:\\UnrealEngine\\UE_4.25\\Engine\\Extras\\VisualStudioDebugging\\UE4.natvis"
+		},
+		{
+			"name": "GameProject (DebugGame)",
+			"request": "launch",
+			"preLaunchTask": "GameProject Win64 DebugGame Build",
+			"program": "D:\\_GameProject\\GameProject\\Binaries\\Win64\\UE4-Win64-DebugGame.exe",
+			"args": [
+			],
+			"cwd": "D:\\UnrealEngine\\UE_4.25",
+			"stopAtEntry": false,
+			"externalConsole": true,
+			"type": "cppvsdbg",
+			"visualizerFile": "D:\\UnrealEngine\\UE_4.25\\Engine\\Extras\\VisualStudioDebugging\\UE4.natvis"
+		},
+		{
+			"name": "GameProject (Development)",
+			"request": "launch",
+			"preLaunchTask": "GameProject Win64 Development Build",
+			"program": "D:\\_GameProject\\GameProject\\Binaries\\Win64\\UE4.exe",
+			"args": [
+			],
+			"cwd": "D:\\UnrealEngine\\UE_4.25",
+			"stopAtEntry": false,
+			"externalConsole": true,
+			"type": "cppvsdbg",
+			"visualizerFile": "D:\\UnrealEngine\\UE_4.25\\Engine\\Extras\\VisualStudioDebugging\\UE4.natvis"
+		},
+		{
+			"name": "GameProject (Shipping)",
+			"request": "launch",
+			"preLaunchTask": "GameProject Win64 Shipping Build",
+			"program": "D:\\_GameProject\\GameProject\\Binaries\\Win64\\UE4-Win64-Shipping.exe",
+			"args": [
+			],
+			"cwd": "D:\\UnrealEngine\\UE_4.25",
+			"stopAtEntry": false,
+			"externalConsole": true,
+			"type": "cppvsdbg",
+			"visualizerFile": "D:\\UnrealEngine\\UE_4.25\\Engine\\Extras\\VisualStudioDebugging\\UE4.natvis"
+		},
+		{
+			"name": "GameProject (Test)",
+			"request": "launch",
+			"preLaunchTask": "GameProject Win64 Test Build",
+			"program": "D:\\_GameProject\\GameProject\\Binaries\\Win64\\UE4-Win64-Test.exe",
+			"args": [
+			],
+			"cwd": "D:\\UnrealEngine\\UE_4.25",
+			"stopAtEntry": false,
+			"externalConsole": true,
+			"type": "cppvsdbg",
+			"visualizerFile": "D:\\UnrealEngine\\UE_4.25\\Engine\\Extras\\VisualStudioDebugging\\UE4.natvis"
+		},
+		{
+			"name": "GameProjectEditor (Debug)",
+			"request": "launch",
+			"preLaunchTask": "GameProjectEditor Win64 Debug Build",
+			"program": "D:\\UnrealEngine\\UE_4.25\\Engine\\Binaries\\Win64\\UE4Editor-Win64-Debug.exe",
+			"args": [
+				"D:\\_GameProject\\GameProject\\GameProject.uproject"
+			],
+			"cwd": "D:\\UnrealEngine\\UE_4.25",
+			"stopAtEntry": false,
+			"externalConsole": true,
+			"type": "cppvsdbg",
+			"visualizerFile": "D:\\UnrealEngine\\UE_4.25\\Engine\\Extras\\VisualStudioDebugging\\UE4.natvis"
+		},
+		{
+			"name": "GameProjectEditor (DebugGame)",
+			"request": "launch",
+			"preLaunchTask": "GameProjectEditor Win64 DebugGame Build",
+			"program": "D:\\UnrealEngine\\UE_4.25\\Engine\\Binaries\\Win64\\UE4Editor-Win64-DebugGame.exe",
+			"args": [
+				"D:\\_GameProject\\GameProject\\GameProject.uproject"
+			],
+			"cwd": "D:\\UnrealEngine\\UE_4.25",
+			"stopAtEntry": false,
+			"externalConsole": true,
+			"type": "cppvsdbg",
+			"visualizerFile": "D:\\UnrealEngine\\UE_4.25\\Engine\\Extras\\VisualStudioDebugging\\UE4.natvis"
+		},
+		{
+			"name": "GameProjectEditor (Development)",
+			"request": "launch",
+			"preLaunchTask": "GameProjectEditor Win64 Development Build",
+			"program": "D:\\UnrealEngine\\UE_4.25\\Engine\\Binaries\\Win64\\UE4Editor.exe",
+			"args": [
+				"D:\\_GameProject\\GameProject\\GameProject.uproject"
+			],
+			"cwd": "D:\\UnrealEngine\\UE_4.25",
+			"stopAtEntry": false,
+			"externalConsole": true,
+			"type": "cppvsdbg",
+			"visualizerFile": "D:\\UnrealEngine\\UE_4.25\\Engine\\Extras\\VisualStudioDebugging\\UE4.natvis"
+		},
+		{
+			"name": "Generate Project Files",
+			"type": "clr",
+			"request": "launch",
+			"program": "D:\\UnrealEngine\\UE_4.25\\Engine\\Binaries\\DotNET\\UnrealBuildTool.exe",
+			"console": "externalTerminal",
+			"args": [
+				"-projectfiles",
+				"-vscode",
+				"-project=\"D:\\_GameProject\\GameProject\\GameProject.uproject\"",
+				"-game",
+				"-engine"
+			],
+			"internalConsoleOptions": "openOnSessionStart",
+			"cwd": "D:\\UnrealEngine\\UE_4.25"
+		}
+	]
+}
