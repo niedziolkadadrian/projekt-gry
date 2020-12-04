@@ -9,6 +9,7 @@
 #include "DialogWidget.h"
 #include "HintWidget.h"
 #include "InventoryWidget.h"
+#include "PlayerInventoryWidget.h"
 
 #include "InGameHUD.generated.h"
 
@@ -36,12 +37,17 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category="Widgets")
 	TSubclassOf<UUserWidget> InventoryWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category="Widgets")
+	TSubclassOf<UUserWidget> PlayerInventoryWidgetClass;
 	
 	UDialogWidget* GetDialogWidget();
 	UHintWidget* GetHintWidget();
 	UInventoryWidget* GetInventoryWidget();
+	UPlayerInventoryWidget* GetPlayerInventoryWidget();
 private:
 	UDialogWidget* dialogWidget;
 	UHintWidget* hintWidget;
 	UInventoryWidget* inventoryWidget;
+	UPlayerInventoryWidget* playerInventoryWidget;
 };

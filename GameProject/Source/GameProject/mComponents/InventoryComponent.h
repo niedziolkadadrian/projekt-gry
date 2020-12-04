@@ -7,6 +7,7 @@
 #include "../Items/ItemBase.h"
 #include "InventoryComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FInventoryUpdated);
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
 class GAMEPROJECT_API UInventoryComponent : public UActorComponent
@@ -21,12 +22,20 @@ public:
 	virtual void BeginPlay() override;
 
 	bool AddItem(class UItemBase* Item);
+	bool AddItem(class UItemBase* Item, int32 Index);
 	bool RemoveItem(class UItemBase* Item);
+	bool RemoveItem(class UItemBase* Item, int32 Index);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Items")
 	TArray<class UItemBase*> Items;
 
 	UPROPERTY(EditDefaultsOnly, Category="Inventory")
-	FVector2D Size;
+	FIntPoint Size;
+
+	UPROPERTY(EditAnywhere, Category="Inventory")
+	FText InventoryName;
+
+	UPROPERTY(BlueprintAssignable, Category="Inventory")
+	FInventoryUpdated OnInventoryUpdated;
 		
 };

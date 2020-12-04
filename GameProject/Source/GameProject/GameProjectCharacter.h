@@ -49,7 +49,7 @@ public:
 	void OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex);
 
 protected:
-
+	virtual void BeginPlay() override;
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
 
@@ -87,6 +87,8 @@ public:
 	/** Returns FollowCamera subobject **/
 	FORCEINLINE class UCameraComponent* GetFollowCamera() const { return FollowCamera; }
 
+	FORCEINLINE class UInventoryComponent* GetInvenotry() const { return Inventory; }
+
 //-------------------------------------------------------------------------------------
 	UPROPERTY(EditAnywhere, Category="Debug")
 	bool ShowDebugLine;
@@ -104,7 +106,7 @@ public:
 	void UseItem(class UItemBase* Item);
 private:
 
-	uint8 OverlappedInteractActors;
+	int32 OverlappedInteractActors;
 	AActor* FocusedActor;
 	bool IsInvOpen;
 
@@ -112,6 +114,9 @@ private:
 	void TraceLine();
 
 	void OpenCloseInventory();
+	
+	UFUNCTION()
+	void OnUpdateInventory();
 
 };
 

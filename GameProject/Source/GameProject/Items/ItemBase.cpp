@@ -7,4 +7,6 @@ UItemBase::UItemBase()
 {
     ItemDisplayName=FText::FromString("Item");
     UseText=FText::FromString("Use");
+    StackSize=1;
+    Quantity=1;
 }

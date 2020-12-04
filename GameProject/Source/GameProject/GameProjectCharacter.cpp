@@ -58,7 +58,10 @@ AGameProjectCharacter::AGameProjectCharacter()
 	TriggerCapsule->OnComponentEndOverlap.AddDynamic(this, &AGameProjectCharacter::OnOverlapEnd);
 
 	Inventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("PlayerInventory"));
-	Inventory->Size=FVector2D(9.f,4.f);
+	Inventory->Size=FIntPoint(9,4);
+	Inventory->InventoryName=FText::FromString("Your Inventory");
+	Inventory->OnInventoryUpdated.AddDynamic(this,&AGameProjectCharacter::OnUpdateInventory);
+
 
 	OverlappedInteractActors=0;
 	FocusedActor=nullptr;
@@ -99,6 +102,17 @@ void AGameProjectCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AGameProjectCharacter::OnResetVR);
 }
 
+void AGameProjectCharacter::BeginPlay(){
+	Super::BeginPlay();
+	TArray<AActor*> OverlappedActors;
+	this->GetOverlappingActors(OverlappedActors, UInteractInterface::StaticClass());
+	OverlappedInteractActors=OverlappedActors.Num();
+	if(OverlappedInteractActors>0)
+	if(!GetWorld()->GetTimerManager().IsTimerActive(LTraceTimerHandle))
+		GetWorld()->GetTimerManager().SetTimer(LTraceTimerHandle, this, &AGameProjectCharacter::TraceLine,0.1f,true);	
+	if(GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, FString::Printf(TEXT("%d"),OverlappedInteractActors));
+}
 
 void AGameProjectCharacter::OnResetVR()
 {
@@ -185,6 +199,8 @@ class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, con
 			OverlappedInteractActors++;
 		}
 	}
+	if(GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, FString::Printf(TEXT("%d"),OverlappedInteractActors));
 }
 
 void AGameProjectCharacter::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, 
@@ -193,6 +209,9 @@ class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 	IInteractInterface* InteractInt=Cast<IInteractInterface>(OtherActor);
 	if(InteractInt){	//jeżeli ma InteractInterface
 		OverlappedInteractActors--;
+		if(OverlappedInteractActors<0)
+			OverlappedInteractActors=0;
+		//FMath::Clamp<int32>(OverlappedInteractActors,0,TNumericLimits<int32>::Max());
 		if(!OverlappedInteractActors){	//if it's last stop checking what player is looking at
 			
 			if(GetWorld()->GetTimerManager().IsTimerActive(LTraceTimerHandle))
@@ -207,6 +226,8 @@ class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 			FocusedActor=nullptr;	//ustawiam FocusedActor na nullptr
 		}
 	}
+	if(GEngine)
+		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, FString::Printf(TEXT("%d"),OverlappedInteractActors));
 	
 }
 
@@ -251,20 +272,38 @@ void AGameProjectCharacter::TraceLine(){
 	
 	if(ShowDebugLine)
 		DrawDebugLine(GetWorld(),Loc,End,FColor::Red,false,2.f);
+
+
+	//CHWILOWE DEBUG INVENTORY
+	FString InventoryString;
+	for(int i=0; i<(Inventory->Size.X*Inventory->Size.Y);i++){
+		if(Inventory->Items[i]){
+			FString Name = Inventory->Items[i]->IDName.ToString();
+			InventoryString += FString::Printf(TEXT("%d: %s x%d "), i, *Name,Inventory->Items[i]->Quantity);	
+		}
+		else{
+			InventoryString += FString::Printf(TEXT("%d: null "),i);	
+		}
+		if(i%9==0 && i>0)
+			InventoryString += "\n";
+	}
+	if(GEngine)
+		GEngine->AddOnScreenDebugMessage(5, 1.f, FColor::Yellow, InventoryString);
 }
 
 void AGameProjectCharacter::OpenCloseInventory(){
 	if(!IsInvOpen){
 		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 		if(InGameHUD){
-			InGameHUD->GetInventoryWidget()->ShowInventory();
+			InGameHUD->GetPlayerInventoryWidget()->Update(Inventory);
+			InGameHUD->GetPlayerInventoryWidget()->ShowInventory();
 		}
 		IsInvOpen=true;
 	}
 	else{
 		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 		if(InGameHUD){
-			InGameHUD->GetInventoryWidget()->HideInventory();
+			InGameHUD->GetPlayerInventoryWidget()->HideInventory();
 		}
 		IsInvOpen=false;
 	}
@@ -273,5 +312,16 @@ void AGameProjectCharacter::OpenCloseInventory(){
 void AGameProjectCharacter::UseItem(class UItemBase* Item){
 	if(Item){
 		Item->OnUse(this);
+	}
+}
+
+void AGameProjectCharacter::OnUpdateInventory(){
+	if(IsInvOpen){
+		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+		if(InGameHUD){
+			InGameHUD->GetInventoryWidget()->Update(Inventory);
+			if(GEngine)
+				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "InvUpdated");
+		}
 	}
 }

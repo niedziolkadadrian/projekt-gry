@@ -27,3 +27,7 @@ void UInventoryWidget::HideInventory(){
         InvCanva->SetVisibility(ESlateVisibility::Hidden);
     }
 }
+
+void UInventoryWidget::Update(UInventoryComponent* Inventory){
+    
+}

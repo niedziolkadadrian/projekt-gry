@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 #include "Runtime/UMG/Public/UMG.h"
+#include "../mComponents/InventoryComponent.h"
 #include "InventoryWidget.generated.h"
 
 /**
@@ -21,6 +22,7 @@ public:
 
 	void ShowInventory();
 	void HideInventory();
+	void Update(UInventoryComponent* Inventory);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UCanvasPanel* InvCanva;

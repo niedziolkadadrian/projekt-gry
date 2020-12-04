@@ -31,10 +31,19 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Item")
 	FText ItemDisplayName;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Item")
+	FText IDName;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Item", meta=(MultiLine=true))
 	FText ItemDescription;
 
+	//Stacks
+	UPROPERTY(VisibleDefaultsOnly, BluePrintReadWrite, Category="Item", meta=(ClampMin=1))
+	int32 Quantity;
+	UPROPERTY(EditDefaultsOnly, BluePrintReadWrite, Category="Item", meta=(ClampMin=1))
+	int32 StackSize;
+	
 	//which inventory owns this item (f.e player inv, chest inv, npc inv)
 	UPROPERTY()
 	class UInventoryComponent* OwningInventory;
