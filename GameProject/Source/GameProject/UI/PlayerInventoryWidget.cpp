@@ -34,14 +34,41 @@ void UPlayerInventoryWidget::Update(UInventoryComponent* Inventory){
     InventorySlots->ClearChildren();
     
     for(int i=0;i<Inventory->Size.X;i++){
-        UButton* elem=WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
-        QuickActionSlots->AddChildToUniformGrid(elem, 0, i);
+        if(InventoryItemWidgetClass){
+            UInventoryItemWidget* elem=CreateWidget<UInventoryItemWidget>(this,InventoryItemWidgetClass);
+            QuickActionSlots->AddChildToUniformGrid(elem, 0, i);
+            elem->QuickActionBox->SetVisibility(ESlateVisibility::Visible);
+            elem->QuickActionIndex->SetText(FText::FromString(FString::FromInt(i+1)));
+            UItemBase* Item=Inventory->Items[0*9+i];
+            if(Item){
+                if(Item->Icon)
+                    elem->ItemImage->SetBrushFromTexture(Item->Icon,true);
+                elem->ItemImage->SetVisibility(ESlateVisibility::Visible);
+                if(Item->Quantity>1){
+                    elem->ItemQuantityBox->SetVisibility(ESlateVisibility::Visible);
+                    elem->ItemQuantity->SetText(FText::FromString(FString::FromInt(Item->Quantity)));
+                }   
+            }
+        }
+            
     }
 
     for(int j=1;j<Inventory->Size.Y;j++){
         for(int i=0;i<Inventory->Size.X;i++){
-            UButton* elem=WidgetTree->ConstructWidget<UButton>(UButton::StaticClass());
-            InventorySlots->AddChildToUniformGrid(elem, j-1, i);
+            if(InventoryItemWidgetClass){
+                UInventoryItemWidget* elem=CreateWidget<UInventoryItemWidget>(this,InventoryItemWidgetClass);
+                InventorySlots->AddChildToUniformGrid(elem, j-1, i);
+                UItemBase* Item=Inventory->Items[j*9+i];
+                if(Item){
+                    if(Item->Icon)
+                        elem->ItemImage->SetBrushFromTexture(Item->Icon,true);
+                    elem->ItemImage->SetVisibility(ESlateVisibility::Visible);
+                    if(Item->Quantity>1){
+                        elem->ItemQuantityBox->SetVisibility(ESlateVisibility::Visible);
+                        elem->ItemQuantity->SetText(FText::FromString(FString::FromInt(Item->Quantity)));
+                    }    
+                }
+            }
         }
     }
 

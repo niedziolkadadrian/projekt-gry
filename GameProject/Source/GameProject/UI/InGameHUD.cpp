@@ -33,6 +33,12 @@ void AInGameHUD::BeginPlay(){
             playerInventoryWidget->AddToViewport();
         }
     }
+    if(CraftingWidgetClass){
+        craftingWidget = CreateWidget<UCraftingWidget>(GetWorld(),CraftingWidgetClass);
+        if(craftingWidget){
+            craftingWidget->AddToViewport();
+        }
+    }
 }
 
 void AInGameHUD::Tick(float deltaSeconds){
@@ -65,5 +71,11 @@ UInventoryWidget* AInGameHUD::GetInventoryWidget(){
 UPlayerInventoryWidget* AInGameHUD::GetPlayerInventoryWidget(){
     if(playerInventoryWidget)
         return playerInventoryWidget;
+    return nullptr;
+}
+
+UCraftingWidget* AInGameHUD::GetCraftingWidget(){
+    if(craftingWidget)
+        return craftingWidget;
     return nullptr;
 }

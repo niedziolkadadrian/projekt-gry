@@ -58,14 +58,16 @@ AGameProjectCharacter::AGameProjectCharacter()
 	TriggerCapsule->OnComponentEndOverlap.AddDynamic(this, &AGameProjectCharacter::OnOverlapEnd);
 
 	Inventory = CreateDefaultSubobject<UInventoryComponent>(TEXT("PlayerInventory"));
-	Inventory->Size=FIntPoint(9,4);
 	Inventory->InventoryName=FText::FromString("Your Inventory");
 	Inventory->OnInventoryUpdated.AddDynamic(this,&AGameProjectCharacter::OnUpdateInventory);
-
+	PlayerInventorySize = FIntPoint(9,4);
+	Inventory->Size=PlayerInventorySize;
 
 	OverlappedInteractActors=0;
 	FocusedActor=nullptr;
 	IsInvOpen=false;
+
+	IsCraftOpen=false;
 
 	Hunger=100.f;
 }
@@ -82,6 +84,7 @@ void AGameProjectCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 
 	//Akcje
 	PlayerInputComponent->BindAction("Interact", IE_Pressed,  this, &AGameProjectCharacter::Interact);
+	PlayerInputComponent->BindAction("Crafting", IE_Pressed,  this, &AGameProjectCharacter::OpenCrafting);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGameProjectCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGameProjectCharacter::MoveRight);
@@ -104,6 +107,7 @@ void AGameProjectCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 
 void AGameProjectCharacter::BeginPlay(){
 	Super::BeginPlay();
+
 	TArray<AActor*> OverlappedActors;
 	this->GetOverlappingActors(OverlappedActors, UInteractInterface::StaticClass());
 	OverlappedInteractActors=OverlappedActors.Num();
@@ -185,6 +189,23 @@ void AGameProjectCharacter::Interact(){
 	 
 }
 
+void AGameProjectCharacter::OpenCrafting(){
+	if(!IsCraftOpen){
+		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+		if(IsCraftOpen){
+			InGameHUD->GetCraftingWidget()->Update(Inventory);
+			InGameHUD->GetCraftingWidget()->ShowCrafting();
+		}
+		IsCraftOpen=true;
+	}
+	else{
+		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+		if(InGameHUD){
+			InGameHUD->GetCraftingWidget()->HideCrafting();
+		}
+		IsCraftOpen=false;
+	}	
+}
 
 void AGameProjectCharacter::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, 
 class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
@@ -319,7 +340,7 @@ void AGameProjectCharacter::OnUpdateInventory(){
 	if(IsInvOpen){
 		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 		if(InGameHUD){
-			InGameHUD->GetInventoryWidget()->Update(Inventory);
+			InGameHUD->GetPlayerInventoryWidget()->Update(Inventory);
 			if(GEngine)
 				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "InvUpdated");
 		}

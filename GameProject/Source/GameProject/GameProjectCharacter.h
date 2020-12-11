@@ -93,11 +93,16 @@ public:
 	UPROPERTY(EditAnywhere, Category="Debug")
 	bool ShowDebugLine;
 
+	UPROPERTY(EditAnywhere, Category="InventorySize")
+	FIntPoint PlayerInventorySize;
+
 	//zegar dla sprawdzania na co patrzy się postać, gdy OverlappedInteractActors > 0
 	FTimerHandle LTraceTimerHandle;
 
 	//Wywoływane w momencie nacisnięcia przycisku interakcji
 	void Interact();
+
+	void OpenCrafting();
 
 	UPROPERTY(EditAnywhere, BluePrintReadOnly, Category="Needs")
 	float Hunger;
@@ -109,6 +114,7 @@ private:
 	int32 OverlappedInteractActors;
 	AActor* FocusedActor;
 	bool IsInvOpen;
+	bool IsCraftOpen;
 
 	UFUNCTION()
 	void TraceLine();

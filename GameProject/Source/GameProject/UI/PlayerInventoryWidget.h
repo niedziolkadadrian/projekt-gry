@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Runtime/UMG/Public/UMG.h"
 #include "../mComponents/InventoryComponent.h"
+#include "InventoryItemWidget.h"
 #include "PlayerInventoryWidget.generated.h"
 
 /**
@@ -39,4 +40,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UUniformGridPanel* QuickActionSlots;
+
+	UPROPERTY(EditDefaultsOnly, Category="Inventory")
+	TSubclassOf<UUserWidget> InventoryItemWidgetClass;
+
 };

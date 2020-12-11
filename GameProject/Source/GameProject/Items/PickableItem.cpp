@@ -11,6 +11,7 @@ APickableItem::APickableItem()
 
 	InteractionZone = CreateDefaultSubobject<USphereComponent>(TEXT("SphereIntZone"));
 	InteractionZone->SetupAttachment(Mesh);
+	InteractionZone->SetSphereRadius(100.f);
 
 	ToDestroy=false;
 	Item=nullptr;

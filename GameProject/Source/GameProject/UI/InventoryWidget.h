@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Runtime/UMG/Public/UMG.h"
 #include "../mComponents/InventoryComponent.h"
+#include "InventoryItemWidget.h"
 #include "InventoryWidget.generated.h"
 
 /**
@@ -26,5 +27,8 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UCanvasPanel* InvCanva;
+
+	UPROPERTY(EditDefaultsOnly, Category="Inventory")
+	TSubclassOf<UUserWidget> InventoryItemWidgetClass;
 	
 };
