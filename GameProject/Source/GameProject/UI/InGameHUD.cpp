@@ -4,39 +4,54 @@
 #include "InGameHUD.h"
 
 AInGameHUD::AInGameHUD(){
-
+    ActiveUIElems=0;
+    UIControl=false;
 }
 
 void AInGameHUD::BeginPlay(){
     Super::BeginPlay();
+    mouseSlot=NewObject<UMouseSlot>(GetWorld());
+    if(HUDWidgetClass){
+        hudWidget = CreateWidget<UUserWidget>(GetWorld(),HUDWidgetClass);
+        if(hudWidget){
+            hudWidget->AddToViewport();
+            hudWidgetCanva=Cast<UCanvasPanel>(hudWidget->GetRootWidget());
+        }
+    }
     if(DialogWidgetClass){
-        dialogWidget = CreateWidget<UDialogWidget>(GetWorld(),DialogWidgetClass);
+        dialogWidget = CreateWidget<UDialogWidget>(hudWidget,DialogWidgetClass);
         if(dialogWidget){
-            dialogWidget->AddToViewport();
+            hudWidgetCanva->AddChildToCanvas(dialogWidget);
         }
     }
     if(HintWidgetClass){
-        hintWidget = CreateWidget<UHintWidget>(GetWorld(),HintWidgetClass);
+        hintWidget = CreateWidget<UHintWidget>(hudWidget,HintWidgetClass);
         if(hintWidget){
-            hintWidget->AddToViewport();
+            hudWidgetCanva->AddChildToCanvas(hintWidget);
         }
     }
     if(InventoryWidgetClass){
-        inventoryWidget = CreateWidget<UInventoryWidget>(GetWorld(),InventoryWidgetClass);
+        inventoryWidget = CreateWidget<UInventoryWidget>(hudWidget,InventoryWidgetClass);
         if(inventoryWidget){
-            inventoryWidget->AddToViewport();
+            hudWidgetCanva->AddChildToCanvas(inventoryWidget);
         }
     }
     if(PlayerInventoryWidgetClass){
-        playerInventoryWidget = CreateWidget<UPlayerInventoryWidget>(GetWorld(),PlayerInventoryWidgetClass);
+        playerInventoryWidget = CreateWidget<UPlayerInventoryWidget>(hudWidget,PlayerInventoryWidgetClass);
         if(playerInventoryWidget){
-            playerInventoryWidget->AddToViewport();
+            hudWidgetCanva->AddChildToCanvas(playerInventoryWidget);
         }
     }
     if(CraftingWidgetClass){
-        craftingWidget = CreateWidget<UCraftingWidget>(GetWorld(),CraftingWidgetClass);
+        craftingWidget = CreateWidget<UCraftingWidget>(hudWidget,CraftingWidgetClass);
         if(craftingWidget){
-            craftingWidget->AddToViewport();
+            hudWidgetCanva->AddChildToCanvas(craftingWidget);
+        }
+    }
+    if(RadialMenuWidgetClass){
+        radialMenuWidget = CreateWidget<URadialMenuWidget>(hudWidget,RadialMenuWidgetClass);
+        if(radialMenuWidget){
+            hudWidgetCanva->AddChildToCanvas(radialMenuWidget);
         }
     }
 }
@@ -49,6 +64,42 @@ void AInGameHUD::DrawHUD(){
     Super::DrawHUD();
 }
 
+void AInGameHUD::ChangeInputType(){
+	if(!UIControl){
+		if(ActiveUIElems>0){
+			APlayerController* PC=GetWorld()->GetFirstPlayerController();
+			if(PC){
+                PC->SetInputMode(FInputModeGameAndUI());
+                PC->bShowMouseCursor = true;
+				PC->bEnableClickEvents = true;
+				PC->bEnableMouseOverEvents = true;
+            }
+            UIControl=true;
+		}
+	}
+	else if(!ActiveUIElems){
+		APlayerController* PC=GetWorld()->GetFirstPlayerController();
+		if(PC){
+            PC->SetInputMode(FInputModeGameOnly());
+            PC->bShowMouseCursor = false;
+			PC->bEnableClickEvents = false;
+			PC->bEnableMouseOverEvents = false;
+                
+            //Zmiana sterowania z UI na poprzednie
+            AActor* Actor=Cast<AActor>(PC->GetPawn());
+            if(Actor){
+                UInputStateMachine* InputStateMachine=Actor->FindComponentByClass<UInputStateMachine>();
+                if(InputStateMachine)
+                    InputStateMachine->ActState=InputStateMachine->BeforeUI;
+            }
+        }
+        UIControl=false;
+	}
+}
+
+UMouseSlot* AInGameHUD::GetMouseSlot(){
+    return mouseSlot;
+}
 
 UDialogWidget* AInGameHUD::GetDialogWidget(){
     if(dialogWidget)
@@ -79,3 +130,10 @@ UCraftingWidget* AInGameHUD::GetCraftingWidget(){
         return craftingWidget;
     return nullptr;
 }
+
+URadialMenuWidget* AInGameHUD::GetRadialMenuWidget(){
+    if(radialMenuWidget)
+        return radialMenuWidget;
+    return nullptr;
+}
+

@@ -40,9 +40,22 @@ void ASignwText::OnInteract_Implementation(AActor* Caller){
 		}
 		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 		if(InGameHUD){
+			InGameHUD->ActiveUIElems++;
+			InGameHUD->ChangeInputType();
 			InGameHUD->GetDialogWidget()->ShowDialog(TextDialog);
 		}
-
+		//zmiana stanu
+		APlayerController* PC=GetWorld()->GetFirstPlayerController();
+		if(PC){
+			AActor* Actor=Cast<AActor>(PC->GetPawn());
+            if(Actor){
+                UInputStateMachine* InputStateMachine=Actor->FindComponentByClass<UInputStateMachine>();
+                if(InputStateMachine){
+					InputStateMachine->BeforeUI=InputStateMachine->ActState;
+					InputStateMachine->ActState=UInputStateMachine::State::UI_Dialog;
+				}    
+            }
+		}
 		IsDialogOpened=true;
 	}
 	else{
@@ -70,10 +83,24 @@ void ASignwText::EndFocus_Implementation(){
 void ASignwText::FadeDialogWidget(){
 	AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 	if(InGameHUD){
+		InGameHUD->ActiveUIElems--;
+		if(InGameHUD->ActiveUIElems<0)
+			InGameHUD->ActiveUIElems=0;
+		InGameHUD->ChangeInputType();
 		InGameHUD->GetDialogWidget()->PlayDialogFadeAnim();
 	}
 	if(!GetWorld()->GetTimerManager().IsTimerActive(FadeTimerHandle)){
 		GetWorld()->GetTimerManager().SetTimer(FadeTimerHandle, this, &ASignwText::HideDialogWidget,.5f,false);
+	}
+	//zmiana stanu
+	APlayerController* PC=GetWorld()->GetFirstPlayerController();
+	if(PC){
+		AActor* Actor=Cast<AActor>(PC->GetPawn());
+        if(Actor){
+            UInputStateMachine* InputStateMachine=Actor->FindComponentByClass<UInputStateMachine>();
+            if(InputStateMachine)
+				InputStateMachine->ActState=InputStateMachine->BeforeUI;
+        }
 	}
 	IsDialogOpened=false;
 }

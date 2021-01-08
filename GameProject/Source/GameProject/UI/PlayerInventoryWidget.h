@@ -6,7 +6,9 @@
 #include "Blueprint/UserWidget.h"
 #include "Runtime/UMG/Public/UMG.h"
 #include "../mComponents/InventoryComponent.h"
+#include "InGameHUD.h"
 #include "InventoryItemWidget.h"
+#include "../Items/PickableItem.h"
 #include "PlayerInventoryWidget.generated.h"
 
 /**
@@ -41,7 +43,18 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UUniformGridPanel* QuickActionSlots;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	class UButton* ThrowButton;
+
 	UPROPERTY(EditDefaultsOnly, Category="Inventory")
 	TSubclassOf<UUserWidget> InventoryItemWidgetClass;
+
+	UFUNCTION()
+	void OnInvItemClicked(int32 x, int32 y);
+
+	UFUNCTION()
+	void OnThrowClicked();
+private:
+	UInventoryComponent* currentInventory;
 
 };

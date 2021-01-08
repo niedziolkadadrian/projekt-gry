@@ -6,8 +6,13 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/Border.h"
 #include "Components/Image.h"
+#include "Components/Button.h"
+#include "Components/TextBlock.h"
+#include "Components/SizeBox.h"
+#include "Components/Border.h"
 #include "InventoryItemWidget.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FInventoryItemClicked, int32, x, int32, y);
 /**
  * 
  */
@@ -20,8 +25,17 @@ public:
 
 	virtual void NativeConstruct() override;
 
+	UPROPERTY(EditAnywhere)
+	FVector2D Size;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	class USizeBox* WidgetSizeBox;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UButton* InvItemButton;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	class UBorder* ItemImageBorder;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UImage* ItemImage;
@@ -36,5 +50,17 @@ public:
 	class UTextBlock* ItemQuantity;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
-	class UTextBlock* QuickActionIndex;	
+	class UTextBlock* QuickActionIndex;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FIntPoint position;
+	
+	UFUNCTION()
+	void OnClick();
+	
+	void SetSize(FVector2D s);
+	virtual void SynchronizeProperties() override;
+
+	UPROPERTY(BlueprintAssignable, Category="Inventory")
+	FInventoryItemClicked OnInventoryItemClicked;
 };

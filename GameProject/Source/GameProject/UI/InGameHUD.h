@@ -5,12 +5,15 @@
 #include "CoreMinimal.h"
 #include "GameFramework/HUD.h"
 #include "Components/WidgetComponent.h"
+#include "../MouseSlot.h"
+#include "../mComponents/InputStateMachine.h"
 
 #include "DialogWidget.h"
 #include "HintWidget.h"
 #include "InventoryWidget.h"
 #include "PlayerInventoryWidget.h"
 #include "CraftingWidget.h"
+#include "RadialMenuWidget.h"
 
 #include "InGameHUD.generated.h"
 
@@ -29,6 +32,13 @@ public:
 	virtual void BeginPlay() override;
 
 	virtual void Tick(float deltaSeconds) override;
+	
+	int32 ActiveUIElems;
+	bool UIControl;
+	void ChangeInputType();
+
+	UPROPERTY(EditDefaultsOnly, Category="Widgets")
+	TSubclassOf<UUserWidget> HUDWidgetClass;
 
 	UPROPERTY(EditDefaultsOnly, Category="Widgets")
 	TSubclassOf<UUserWidget> DialogWidgetClass;
@@ -44,16 +54,28 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category="Widgets")
 	TSubclassOf<UUserWidget> CraftingWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category="Widgets")
+	TSubclassOf<UUserWidget> RadialMenuWidgetClass;
 	
+	UMouseSlot* GetMouseSlot();
 	UDialogWidget* GetDialogWidget();
 	UHintWidget* GetHintWidget();
 	UInventoryWidget* GetInventoryWidget();
-	UPlayerInventoryWidget* GetPlayerInventoryWidget();
-	UCraftingWidget* GetCraftingWidget();
+	class UPlayerInventoryWidget* GetPlayerInventoryWidget();
+	class UCraftingWidget* GetCraftingWidget();
+	URadialMenuWidget* GetRadialMenuWidget();
 private:
+	UPROPERTY()
+	UMouseSlot* mouseSlot;
+
+	UUserWidget* hudWidget;
+	UCanvasPanel* hudWidgetCanva;
 	UDialogWidget* dialogWidget;
 	UHintWidget* hintWidget;
 	UInventoryWidget* inventoryWidget;
-	UPlayerInventoryWidget* playerInventoryWidget;
-	UCraftingWidget* craftingWidget;
+	class UPlayerInventoryWidget* playerInventoryWidget;
+	class UCraftingWidget* craftingWidget;
+	URadialMenuWidget* radialMenuWidget;
+	
 };

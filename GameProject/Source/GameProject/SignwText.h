@@ -6,6 +6,7 @@
 #include "GameFramework/Actor.h"
 #include "Components/BoxComponent.h"
 #include "Components/WidgetComponent.h"
+#include "mComponents/InputStateMachine.h"
 #include "Interfaces/InteractInterface.h"
 #include "UI/InGameHUD.h"
 #include "SignwText.generated.h"

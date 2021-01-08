@@ -37,6 +37,11 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Item", meta=(MultiLine=true))
 	FText ItemDescription;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Item")
+	TArray<TSubclassOf<UItemBase>> CraftIngredients;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Item")
+	TArray<int32> CraftIngredientsQuantity;
 
 	//Stacks
 	UPROPERTY(VisibleDefaultsOnly, BluePrintReadWrite, Category="Item", meta=(ClampMin=1))

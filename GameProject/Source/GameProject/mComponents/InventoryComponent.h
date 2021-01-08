@@ -23,8 +23,10 @@ public:
 
 	bool AddItem(class UItemBase* Item);
 	bool AddItem(class UItemBase* Item, int32 Index);
-	bool RemoveItem(class UItemBase* Item);
-	bool RemoveItem(class UItemBase* Item, int32 Index);
+	bool RemoveItems(class UItemBase* Item, int32 Quantity);
+	bool RemoveItemFromSlot(int32 Index);
+
+	int32 GetItemQuantity(class UItemBase* Item);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Items")
 	TArray<class UItemBase*> Items;

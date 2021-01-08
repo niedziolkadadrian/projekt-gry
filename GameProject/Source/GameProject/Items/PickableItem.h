@@ -44,8 +44,9 @@ public:
 	virtual void EndFocus_Implementation();
 
 	UFUNCTION(BluePrintCallable, Category="Item")
-	void SetItem(TSubclassOf<UItemBase> ItmClass,UItemBase* Itm);
+	void SetItem(TSubclassOf<UItemBase> itmClass,UItemBase* itm);
 private:
+	UPROPERTY()
 	UItemBase* Item;
 	bool ToDestroy;
 

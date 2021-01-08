@@ -16,8 +16,6 @@ void UInventoryComponent::BeginPlay()
 {
 	Super::BeginPlay();
 	Items.SetNum(Size.X*Size.Y,false);
-	if(GEngine)
-      GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("%d"), Items.Num()));   
 }
 
 
@@ -55,21 +53,54 @@ bool UInventoryComponent::AddItem(class UItemBase* Item)
 }
 bool UInventoryComponent::AddItem(class UItemBase* Item, int32 Index)
 {
+	if(!Items[Index]){
+		Items[Index]=Item;
+		OnInventoryUpdated.Broadcast();
+		return true;
+	}
 	return false;
 }
 
-bool UInventoryComponent::RemoveItem(class UItemBase* Item){
-	/*if(Item){
-		Item->OwningInventory=nullptr;
-		Item->World=nullptr;
-
-		return true;
-	}*/
+bool UInventoryComponent::RemoveItems(class UItemBase* Item, int32 Quantity){
+	for(int32 i=0;i<Size.X*Size.Y;i++){
+		if(Items[i]){
+			if(Items[i]->IDName.EqualTo(Item->IDName,ETextComparisonLevel::Default)){
+				if(Quantity>=Items[i]->Quantity){
+					Quantity-=Items[i]->Quantity;
+					Items[i]->ConditionalBeginDestroy();
+					Items[i]=nullptr;
+				}
+				else{
+					Items[i]->Quantity-=Quantity;
+					Quantity=0;
+					OnInventoryUpdated.Broadcast();
+					return true;
+				}
+			}
+		}
+	}
 	OnInventoryUpdated.Broadcast();
 	return false;
 }
 
-bool UInventoryComponent::RemoveItem(class UItemBase* Item, int32 Index)
+bool UInventoryComponent::RemoveItemFromSlot(int32 Index)
 {
+	if(Items[Index]){
+		Items[Index]=nullptr;
+		OnInventoryUpdated.Broadcast();
+		return true;
+	}
 	return false;
+}
+
+int32 UInventoryComponent::GetItemQuantity(class UItemBase* Item){
+	int32 Q=0;
+	for(int32 i=0;i<Size.X*Size.Y;i++){
+		if(Items[i]){
+			if(Items[i]->IDName.EqualTo(Item->IDName,ETextComparisonLevel::Default)){
+				Q+=Items[i]->Quantity;
+			}
+		}
+	}
+	return Q;
 }

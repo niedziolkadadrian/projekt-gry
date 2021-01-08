@@ -62,12 +62,18 @@ AGameProjectCharacter::AGameProjectCharacter()
 	Inventory->OnInventoryUpdated.AddDynamic(this,&AGameProjectCharacter::OnUpdateInventory);
 	PlayerInventorySize = FIntPoint(9,4);
 	Inventory->Size=PlayerInventorySize;
+	
+	InputStateMachine = CreateDefaultSubobject<UInputStateMachine>(TEXT("InputStateMachine"));
 
 	OverlappedInteractActors=0;
 	FocusedActor=nullptr;
 	IsInvOpen=false;
+	BuildMode=false;
+	PlaceLocation=FVector(0,0,0);
 
 	IsCraftOpen=false;
+
+	BuildingSystem = CreateDefaultSubobject<UBuildingSystemComponent>(TEXT("BuildingSystem"));
 
 	Hunger=100.f;
 }
@@ -79,12 +85,16 @@ void AGameProjectCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &ACharacter::Jump);
-	PlayerInputComponent->BindAction("Jump", IE_Released, this, &ACharacter::StopJumping);
+
+	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AGameProjectCharacter::Jump);
+	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AGameProjectCharacter::StopJumping);
 
 	//Akcje
 	PlayerInputComponent->BindAction("Interact", IE_Pressed,  this, &AGameProjectCharacter::Interact);
 	PlayerInputComponent->BindAction("Crafting", IE_Pressed,  this, &AGameProjectCharacter::OpenCrafting);
+	
+	//PlayerInputComponent->BindAction("BuildingMenu", IE_Pressed,  this, &AGameProjectCharacter::OpenRadialMenu);
+	//PlayerInputComponent->BindAction("BuildingMenu", IE_Released,  this, &AGameProjectCharacter::CloseRadialMenu);
 
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGameProjectCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGameProjectCharacter::MoveRight);
@@ -113,11 +123,25 @@ void AGameProjectCharacter::BeginPlay(){
 	OverlappedInteractActors=OverlappedActors.Num();
 	if(OverlappedInteractActors>0)
 	if(!GetWorld()->GetTimerManager().IsTimerActive(LTraceTimerHandle))
-		GetWorld()->GetTimerManager().SetTimer(LTraceTimerHandle, this, &AGameProjectCharacter::TraceLine,0.1f,true);	
-	if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, FString::Printf(TEXT("%d"),OverlappedInteractActors));
+		GetWorld()->GetTimerManager().SetTimer(LTraceTimerHandle, this, &AGameProjectCharacter::TraceLineInteract,0.1f,true);
 }
 
+void AGameProjectCharacter::Jump(){
+	if(InputStateMachine->ActState==UInputStateMachine::State::PlayerInput ||
+	   InputStateMachine->ActState==UInputStateMachine::State::Building)
+	{
+		Super::Jump();
+	}
+	
+}
+void AGameProjectCharacter::StopJumping(){
+	if(InputStateMachine->ActState==UInputStateMachine::State::PlayerInput ||
+	   InputStateMachine->ActState==UInputStateMachine::State::Building)
+	{
+		Super::StopJumping();
+	}
+	
+}
 void AGameProjectCharacter::OnResetVR()
 {
 	UHeadMountedDisplayFunctionLibrary::ResetOrientationAndPosition();
@@ -125,12 +149,12 @@ void AGameProjectCharacter::OnResetVR()
 
 void AGameProjectCharacter::TouchStarted(ETouchIndex::Type FingerIndex, FVector Location)
 {
-		Jump();
+	Jump();
 }
 
 void AGameProjectCharacter::TouchStopped(ETouchIndex::Type FingerIndex, FVector Location)
 {
-		StopJumping();
+	StopJumping();
 }
 
 void AGameProjectCharacter::TurnAtRate(float Rate)
@@ -147,30 +171,36 @@ void AGameProjectCharacter::LookUpAtRate(float Rate)
 
 void AGameProjectCharacter::MoveForward(float Value)
 {
-	if ((Controller != NULL) && (Value != 0.0f))
-	{
-		// find out which way is forward
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
+	if(InputStateMachine->ActState==UInputStateMachine::State::PlayerInput ||
+	   InputStateMachine->ActState==UInputStateMachine::State::Building){
+		if ((Controller != NULL) && (Value != 0.0f))
+		{
+			// find out which way is forward
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
 
-		// get forward vector
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
-		AddMovementInput(Direction, Value);
+			// get forward vector
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::X);
+			AddMovementInput(Direction, Value);
+		}
 	}
 }
 
 void AGameProjectCharacter::MoveRight(float Value)
 {
-	if ( (Controller != NULL) && (Value != 0.0f) )
-	{
-		// find out which way is right
-		const FRotator Rotation = Controller->GetControlRotation();
-		const FRotator YawRotation(0, Rotation.Yaw, 0);
-	
-		// get right vector 
-		const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
-		// add movement in that direction
-		AddMovementInput(Direction, Value);
+	if(InputStateMachine->ActState==UInputStateMachine::State::PlayerInput ||
+	   InputStateMachine->ActState==UInputStateMachine::State::Building){
+		if ( (Controller != NULL) && (Value != 0.0f) )
+		{
+			// find out which way is right
+			const FRotator Rotation = Controller->GetControlRotation();
+			const FRotator YawRotation(0, Rotation.Yaw, 0);
+		
+			// get right vector 
+			const FVector Direction = FRotationMatrix(YawRotation).GetUnitAxis(EAxis::Y);
+			// add movement in that direction
+			AddMovementInput(Direction, Value);
+		}
 	}
 }
 
@@ -185,26 +215,7 @@ void AGameProjectCharacter::Interact(){
 		}	
 	}else{
 		OpenCloseInventory();
-	}
-	 
-}
-
-void AGameProjectCharacter::OpenCrafting(){
-	if(!IsCraftOpen){
-		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-		if(IsCraftOpen){
-			InGameHUD->GetCraftingWidget()->Update(Inventory);
-			InGameHUD->GetCraftingWidget()->ShowCrafting();
-		}
-		IsCraftOpen=true;
-	}
-	else{
-		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-		if(InGameHUD){
-			InGameHUD->GetCraftingWidget()->HideCrafting();
-		}
-		IsCraftOpen=false;
-	}	
+	}	 
 }
 
 void AGameProjectCharacter::OnOverlapBegin(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, 
@@ -215,13 +226,11 @@ class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, con
 		if(InteractInt){	//jeżeli ma InteractInterface
 			if(!OverlappedInteractActors){	//if it's first start checking what player is looking at
 				if(!GetWorld()->GetTimerManager().IsTimerActive(LTraceTimerHandle))
-					GetWorld()->GetTimerManager().SetTimer(LTraceTimerHandle, this, &AGameProjectCharacter::TraceLine,0.1f,true);
+					GetWorld()->GetTimerManager().SetTimer(LTraceTimerHandle, this, &AGameProjectCharacter::TraceLineInteract,0.1f,true);
 			}
 			OverlappedInteractActors++;
 		}
 	}
-	if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, FString::Printf(TEXT("%d"),OverlappedInteractActors));
 }
 
 void AGameProjectCharacter::OnOverlapEnd(class UPrimitiveComponent* OverlappedComp, class AActor* OtherActor, 
@@ -247,12 +256,9 @@ class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
 			FocusedActor=nullptr;	//ustawiam FocusedActor na nullptr
 		}
 	}
-	if(GEngine)
-		GEngine->AddOnScreenDebugMessage(-1, 15.f, FColor::Yellow, FString::Printf(TEXT("%d"),OverlappedInteractActors));
-	
 }
 
-void AGameProjectCharacter::TraceLine(){
+void AGameProjectCharacter::TraceLineInteract(){
 	FVector Loc;
 	FRotator Rot;
 	FHitResult Hit;
@@ -296,6 +302,7 @@ void AGameProjectCharacter::TraceLine(){
 
 
 	//CHWILOWE DEBUG INVENTORY
+	/*
 	FString InventoryString;
 	for(int i=0; i<(Inventory->Size.X*Inventory->Size.Y);i++){
 		if(Inventory->Items[i]){
@@ -310,23 +317,39 @@ void AGameProjectCharacter::TraceLine(){
 	}
 	if(GEngine)
 		GEngine->AddOnScreenDebugMessage(5, 1.f, FColor::Yellow, InventoryString);
+	*/
 }
 
 void AGameProjectCharacter::OpenCloseInventory(){
-	if(!IsInvOpen){
-		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-		if(InGameHUD){
-			InGameHUD->GetPlayerInventoryWidget()->Update(Inventory);
-			InGameHUD->GetPlayerInventoryWidget()->ShowInventory();
+	if(InputStateMachine->ActState==UInputStateMachine::State::PlayerInput ||
+	   InputStateMachine->ActState==UInputStateMachine::State::Building ||
+	   InputStateMachine->ActState==UInputStateMachine::State::UI_CraftInv)
+	{
+		if(!IsInvOpen){
+			AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+			if(InGameHUD){
+				InGameHUD->ActiveUIElems++;
+				InGameHUD->ChangeInputType();
+				InGameHUD->GetPlayerInventoryWidget()->Update(Inventory);
+				InGameHUD->GetPlayerInventoryWidget()->ShowInventory();
+				if(InputStateMachine->ActState!=UInputStateMachine::State::UI_CraftInv){
+					InputStateMachine->BeforeUI=InputStateMachine->ActState;
+					InputStateMachine->ActState=UInputStateMachine::State::UI_CraftInv;
+				}
+			}
+			IsInvOpen=true;
 		}
-		IsInvOpen=true;
-	}
-	else{
-		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-		if(InGameHUD){
-			InGameHUD->GetPlayerInventoryWidget()->HideInventory();
+		else{
+			AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+			if(InGameHUD){
+				InGameHUD->ActiveUIElems--;
+				if(InGameHUD->ActiveUIElems<0)
+					InGameHUD->ActiveUIElems=0;
+				InGameHUD->ChangeInputType();
+				InGameHUD->GetPlayerInventoryWidget()->HideInventory();
+			}
+			IsInvOpen=false;
 		}
-		IsInvOpen=false;
 	}
 }
 
@@ -336,13 +359,83 @@ void AGameProjectCharacter::UseItem(class UItemBase* Item){
 	}
 }
 
+void AGameProjectCharacter::OpenCrafting(){
+	if(InputStateMachine->ActState==UInputStateMachine::State::PlayerInput ||
+	   InputStateMachine->ActState==UInputStateMachine::State::Building ||
+	   InputStateMachine->ActState==UInputStateMachine::State::UI_CraftInv)
+	{
+		if(!IsCraftOpen){
+			AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+			if(InGameHUD){
+				InGameHUD->ActiveUIElems++;
+				InGameHUD->ChangeInputType();
+				InGameHUD->GetCraftingWidget()->Update(Inventory);
+				InGameHUD->GetCraftingWidget()->ShowCrafting();
+				if(InputStateMachine->ActState!=UInputStateMachine::State::UI_CraftInv){
+					InputStateMachine->BeforeUI=InputStateMachine->ActState;
+					InputStateMachine->ActState=UInputStateMachine::State::UI_CraftInv;
+				}
+			}
+			IsCraftOpen=true;
+		}
+		else{
+			AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+			if(InGameHUD){
+				InGameHUD->ActiveUIElems--;
+				if(InGameHUD->ActiveUIElems<0)
+					InGameHUD->ActiveUIElems=0;
+				InGameHUD->ChangeInputType();
+				InGameHUD->GetCraftingWidget()->HideCrafting();
+			}
+			IsCraftOpen=false;
+		}	
+	}
+}
+
 void AGameProjectCharacter::OnUpdateInventory(){
-	if(IsInvOpen){
+	if(InputStateMachine->ActState==UInputStateMachine::State::UI_CraftInv){
 		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 		if(InGameHUD){
+			InGameHUD->GetCraftingWidget()->Update(Inventory);
 			InGameHUD->GetPlayerInventoryWidget()->Update(Inventory);
 			if(GEngine)
 				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "InvUpdated");
 		}
+	}
+}
+
+void AGameProjectCharacter::ToogleBuildMode(){
+	if(!BuildMode){
+		BuildMode=true;
+		if(GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Green, "BuildModeOn");
+	}
+	else{
+		BuildMode=false;
+		if(GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "BuildModeOff");
+	}
+
+}
+
+/*void AGameProjectCharacter::LeftMouseButton(){
+	PlaceBuilding();
+}*/
+
+void AGameProjectCharacter::PlaceBuilding(){
+	if(InputStateMachine->ActState==UInputStateMachine::State::Building){
+		if(PlaceLocation.X !=0 || PlaceLocation.Y!=0 || PlaceLocation.Z!=0)
+			GetWorld()->SpawnActor(Building->GetClass(),&PlaceLocation,new FRotator(0,0,0),FActorSpawnParameters());
+	}//FTransform(FRotator(0,0,0),PlaceLocation,FVector(1,1,1,1))
+}
+
+void AGameProjectCharacter::OpenRadialMenu(){
+	if(BuildingSystem){
+		BuildingSystem->OpenMenu();
+	}
+}
+void AGameProjectCharacter::CloseRadialMenu(){
+	if(BuildingSystem){
+		BuildingSystem->CloseMenu();
 	}
 }

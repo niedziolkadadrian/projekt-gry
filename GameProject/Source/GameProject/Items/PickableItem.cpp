@@ -21,15 +21,7 @@ APickableItem::APickableItem()
 void APickableItem::BeginPlay()
 {
 	Super::BeginPlay();
-	if(!Item){
-		if(ItemClass){
-			Item = NewObject<UItemBase>(GetWorld(),ItemClass);
-			Item->Quantity=60;
-   		}
-	}
-	if(Item){
-		Mesh->SetStaticMesh(Item->PickupMesh);
-	}
+	SetItem(ItemClass, Item);
 }
 
 void APickableItem::OnInteract_Implementation(AActor* Caller)
@@ -66,9 +58,20 @@ void APickableItem::EndFocus_Implementation()
 		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "Jestem poza");
 }
 
-void APickableItem::SetItem(TSubclassOf<UItemBase> ItmClass,UItemBase* Itm)
+void APickableItem::SetItem(TSubclassOf<UItemBase> itmClass,UItemBase* itm)
 {
-	this->ItemClass=ItmClass;
-	this->Item=Itm;
+	if(!itm){
+		if(itmClass){
+			this->ItemClass=itmClass;
+			Item = NewObject<UItemBase>(GetWorld(),ItemClass);
+			Item->Quantity=60;
+   		}
+	}
+	if(itm && itmClass){
+		this->ItemClass=itmClass;
+		this->Item=itm;
+	}
+	if(Item)
+		Mesh->SetStaticMesh(Item->PickupMesh);
 }
 

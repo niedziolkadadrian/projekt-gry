@@ -4,11 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+
 #include "Engine/EngineTypes.h"
 #include "Interfaces/InteractInterface.h"
 #include "UI/InGameHUD.h"
 #include "Items/ItemBase.h"
 #include "mComponents/InventoryComponent.h"
+#include "mComponents/InputStateMachine.h"
+#include "mComponents/BuildingSystemComponent.h"
 
 #include "GameProjectCharacter.generated.h"
 
@@ -31,6 +34,12 @@ class AGameProjectCharacter : public ACharacter
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="Inventory", meta = (AllowPrivateAccess = "true"))
 	class UInventoryComponent* Inventory;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="InputStateMachine", meta = (AllowPrivateAccess = "true"))
+	class UInputStateMachine* InputStateMachine;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category="BuildingSystem", meta = (AllowPrivateAccess = "true"))
+	class UBuildingSystemComponent* BuildingSystem;
 public:
 	AGameProjectCharacter();
 
@@ -50,6 +59,9 @@ public:
 
 protected:
 	virtual void BeginPlay() override;
+	
+	virtual void Jump() override;
+	virtual void StopJumping() override;
 	/** Resets HMD orientation in VR. */
 	void OnResetVR();
 
@@ -89,6 +101,10 @@ public:
 
 	FORCEINLINE class UInventoryComponent* GetInvenotry() const { return Inventory; }
 
+	FORCEINLINE class UInputStateMachine* GetInputStateMachine() const { return InputStateMachine; }
+
+	FORCEINLINE class UBuildingSystemComponent* GetBuildingSystem() const { return BuildingSystem; }
+
 //-------------------------------------------------------------------------------------
 	UPROPERTY(EditAnywhere, Category="Debug")
 	bool ShowDebugLine;
@@ -98,29 +114,37 @@ public:
 
 	//zegar dla sprawdzania na co patrzy się postać, gdy OverlappedInteractActors > 0
 	FTimerHandle LTraceTimerHandle;
-
+	FTimerHandle LTraceBTimerHandle;
 	//Wywoływane w momencie nacisnięcia przycisku interakcji
 	void Interact();
-
 	void OpenCrafting();
+	void ToogleBuildMode();
+	void PlaceBuilding();
+	void OpenRadialMenu();
+	void CloseRadialMenu();
+	//void LeftMouseButton();
 
 	UPROPERTY(EditAnywhere, BluePrintReadOnly, Category="Needs")
 	float Hunger;
 
 	UFUNCTION(BlueprintCallable, Category="Item")
 	void UseItem(class UItemBase* Item);
-private:
 
+	UPROPERTY(EditAnywhere, BluePrintReadOnly, Category="Building")
+	AActor* Building;
+private:
 	int32 OverlappedInteractActors;
 	AActor* FocusedActor;
 	bool IsInvOpen;
 	bool IsCraftOpen;
+	bool BuildMode;
+	FVector PlaceLocation;
+	//bool CanPlaceBuilding;
 
 	UFUNCTION()
-	void TraceLine();
+	void TraceLineInteract();
 
 	void OpenCloseInventory();
-	
 	UFUNCTION()
 	void OnUpdateInventory();
 
