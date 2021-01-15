@@ -27,7 +27,7 @@ public:
 
 	void ShowCrafting();
 	void HideCrafting();
-	void Update(UInventoryComponent* Inventory);
+	void Update();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	int32 NumOfTypes;
@@ -65,6 +65,7 @@ public:
 	UFUNCTION()
 	void OnCraftingTypeClick(int32 index);
 
+	void CloseSubmenus();
 private:
 	int32 openedType;
 	bool CraftWindowOpened;

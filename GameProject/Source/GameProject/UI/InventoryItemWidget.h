@@ -10,6 +10,7 @@
 #include "Components/TextBlock.h"
 #include "Components/SizeBox.h"
 #include "Components/Border.h"
+#include "Fonts/SlateFontInfo.h"
 #include "InventoryItemWidget.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE_TwoParams(FInventoryItemClicked, int32, x, int32, y);
@@ -27,6 +28,8 @@ public:
 
 	UPROPERTY(EditAnywhere)
 	FVector2D Size;
+	UPROPERTY(EditAnywhere)
+	int32 FontSize;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class USizeBox* WidgetSizeBox;
@@ -55,10 +58,16 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	FIntPoint position;
 	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText ItemName;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FText ItemDescription;
+
 	UFUNCTION()
 	void OnClick();
 	
 	void SetSize(FVector2D s);
+	void SetFontSize(int32 s);
 	virtual void SynchronizeProperties() override;
 
 	UPROPERTY(BlueprintAssignable, Category="Inventory")

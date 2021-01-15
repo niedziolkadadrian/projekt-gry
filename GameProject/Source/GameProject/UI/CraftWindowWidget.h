@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Components/HorizontalBox.h"
 #include "Components/Button.h"
+#include "Components/TextBlock.h"
 #include "../Items/ItemBase.h"
 #include "InventoryItemWidget.h"
 #include "../mComponents/InventoryComponent.h"
@@ -35,6 +36,9 @@ public:
 	UInventoryItemWidget* CraftItem;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	class UTextBlock* CraftItemName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	UHorizontalBox* IngredientsBox;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
@@ -46,8 +50,8 @@ public:
 	UFUNCTION()
 	void OnCraftClicked();
 	
+	void RefreshIngredients();
 private:
-	void RefreshIngredients(class UItemBase* Item);
 	
 	UPROPERTY()
 	class UItemBase* ActualItem;

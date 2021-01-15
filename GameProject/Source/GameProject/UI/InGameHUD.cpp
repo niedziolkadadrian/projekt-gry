@@ -54,6 +54,12 @@ void AInGameHUD::BeginPlay(){
             hudWidgetCanva->AddChildToCanvas(radialMenuWidget);
         }
     }
+    if(QuickSlotsWidgetClass){
+        quickSlotsWidget = CreateWidget<UQuickSlotsWidget>(hudWidget,QuickSlotsWidgetClass);
+        if(quickSlotsWidget){
+            hudWidgetCanva->AddChildToCanvas(quickSlotsWidget);
+        }
+    }
 }
 
 void AInGameHUD::Tick(float deltaSeconds){
@@ -134,6 +140,12 @@ UCraftingWidget* AInGameHUD::GetCraftingWidget(){
 URadialMenuWidget* AInGameHUD::GetRadialMenuWidget(){
     if(radialMenuWidget)
         return radialMenuWidget;
+    return nullptr;
+}
+
+UQuickSlotsWidget* AInGameHUD::GetQuickSlotsWidget(){
+    if(quickSlotsWidget)
+        return quickSlotsWidget;
     return nullptr;
 }
 

@@ -34,12 +34,6 @@ void APickableItem::OnInteract_Implementation(AActor* Caller)
 			ToDestroy=true;
 		}
 	}	
-	/*AGameProjectCharacter* Character=Cast<AGameProjectCharacter>(Caller);
-	if(Character){
-		if(Character->GetInventory())
-			if(Character->GetInventory()->AddItem(Item))
-				this->Destroy();
-	}*/
 }
 
 void APickableItem::StartFocus_Implementation()

@@ -45,9 +45,13 @@ void UCraftingTypeWidget::AddItem(TSubclassOf<UItemBase> ItemClass, int32 index)
             elem->OnInventoryItemClicked.AddDynamic(this,&UCraftingTypeWidget::OnItemClicked);
             
             UItemBase* Item=ItemClass.GetDefaultObject();//NewObject<UItemBase>(this,ItemClass);
-            if(Item)
+            if(Item){
                 if(Item->Icon)
                     elem->ItemImage->SetBrushFromTexture(Item->Icon,false);
+                elem->ItemName=Item->ItemDisplayName;
+                elem->ItemDescription=Item->ItemDescription;
+            }
+                
             elem->ItemImage->SetVisibility(ESlateVisibility::Visible);
         }
     }

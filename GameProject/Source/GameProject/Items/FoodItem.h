@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "ItemBase.h"
+#include "../mComponents/InputStateMachine.h"
 #include "../GameProjectCharacter.h"
 
 #include "FoodItem.generated.h"
@@ -20,5 +21,7 @@ public:
 	float HungerToRecover;
 
 protected:	
-	virtual void OnUse_Implementation(class AGameProjectCharacter* Character);	
+	virtual void OnUse_Implementation(class AActor* Character);
+	virtual void OnEquip_Implementation(class AActor* Character);
+	virtual void OnUnEquip_Implementation(class AActor* Character);
 };

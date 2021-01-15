@@ -90,10 +90,28 @@ void UBuildingSystemComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 	}
 }
 
+
+void UBuildingSystemComponent::StartBuildingMode(){
+	InputStateMachine->ActState=InputState::Building;
+}
+
+void UBuildingSystemComponent::EndBuildingMode(){
+	ActiveBuilding=-1;
+	
+	if(PreviewModel){
+		PreviewModel->SetActorHiddenInGame(true);
+		PreviewModel->Destroy();
+		PreviewModel=nullptr;
+	}
+	
+
+	InputStateMachine->ActState=InputState::PlayerInput;
+}
+
+
 void UBuildingSystemComponent::OpenMenu(){
 	//zmienic na tylko building
-	if(InputStateMachine->ActState==UInputStateMachine::State::PlayerInput ||
-	   InputStateMachine->ActState==UInputStateMachine::State::Building)
+	if(InputStateMachine->ActState==InputState::Building)
 	{
 		if(InGameHUD){
 			if(!RadialInputInitialized){
@@ -116,7 +134,7 @@ void UBuildingSystemComponent::OpenMenu(){
 			InGameHUD->GetRadialMenuWidget()->ShowRadialMenu();
 			
             InputStateMachine->BeforeUI=InputStateMachine->ActState;
-			InputStateMachine->ActState=UInputStateMachine::State::UI_BuildingMenu;
+			InputStateMachine->ActState=InputState::UI_BuildingMenu;
 		}
 	}
 }
@@ -125,7 +143,7 @@ void UBuildingSystemComponent::CloseMenu(){
 	if(GEngine)
       GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("ClosingMenu")));
 	
-	if(InputStateMachine->ActState==UInputStateMachine::State::UI_BuildingMenu){
+	if(InputStateMachine->ActState==InputState::UI_BuildingMenu){
 		if(InGameHUD){
 			InGameHUD->ActiveUIElems--;
 			InGameHUD->ChangeInputType();
@@ -143,7 +161,7 @@ void UBuildingSystemComponent::OpenSubmenuAfterTime(){
 		InGameHUD->GetRadialMenuWidget()->ShowRadialMenu();
 		
 		InputStateMachine->BeforeUI=InputStateMachine->ActState;
-		InputStateMachine->ActState=UInputStateMachine::State::UI_BuildingMenu;
+		InputStateMachine->ActState=InputState::UI_BuildingMenu;
 	}
 	if(GEngine)
       	GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Black, FString::Printf(TEXT("%d"),Class));
@@ -233,16 +251,14 @@ void UBuildingSystemComponent::OnItemClicked(int32 index){
 }
 
 void UBuildingSystemComponent::RotateBuilding(){
-	if(InputStateMachine->ActState==UInputStateMachine::State::Building ||
-	   InputStateMachine->ActState==UInputStateMachine::State::PlayerInput &&
+	if(InputStateMachine->ActState==InputState::Building &&
 	   ActiveBuilding>=0)
 	{
 		rotateBuildingButtonClicked=true;
 	}
 }
 void UBuildingSystemComponent::StopRotatingBuilding(){
-	if(InputStateMachine->ActState==UInputStateMachine::State::Building ||
-	   InputStateMachine->ActState==UInputStateMachine::State::PlayerInput &&
+	if(InputStateMachine->ActState==InputState::Building &&
 	   ActiveBuilding>=0)
 	{
 		rotateBuildingButtonClicked=false;
@@ -250,8 +266,8 @@ void UBuildingSystemComponent::StopRotatingBuilding(){
 }
 
 void UBuildingSystemComponent::PlaceBuilding(){
-	/*if(InputStateMachine->ActState==UInputStateMachine::State::Building ||
-	 	InputStateMachine->ActState==UInputStateMachine::State::PlayerInput &&
+	/*if(InputStateMachine->ActState==InputState::Building ||
+	 	InputStateMachine->ActState==InputState::PlayerInput &&
 		placeBuildEnabled)
 	{
 		if(!PlaceLocation.Equals(FVector(0,0,0),0)){
@@ -260,8 +276,7 @@ void UBuildingSystemComponent::PlaceBuilding(){
 	
 		}
 	}*/
-	if(InputStateMachine->ActState==UInputStateMachine::State::Building ||
-	   InputStateMachine->ActState==UInputStateMachine::State::PlayerInput &&
+	if(InputStateMachine->ActState==InputState::Building &&
 	   ActiveBuilding>=0)
 	{
 		if(GEngine)

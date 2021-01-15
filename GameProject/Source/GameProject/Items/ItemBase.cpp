@@ -9,4 +9,5 @@ UItemBase::UItemBase()
     UseText=FText::FromString("Use");
     StackSize=1;
     Quantity=1;
+    OwningInventory=nullptr;
 }

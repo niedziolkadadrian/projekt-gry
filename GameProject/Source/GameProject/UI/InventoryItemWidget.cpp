@@ -7,6 +7,9 @@ UInventoryItemWidget::UInventoryItemWidget(const FObjectInitializer& ObjectIniti
 {
     position=FIntPoint(0,0);
     Size=FVector2D(64.0f,64.0f);
+    FontSize=12;
+    ItemName=FText::FromString("");
+    ItemDescription=FText::FromString("");
 }
 
 void UInventoryItemWidget::NativeConstruct(){
@@ -28,12 +31,33 @@ void UInventoryItemWidget::SetSize(FVector2D s){
     Size=s;
     SynchronizeProperties();
 }
+
+void UInventoryItemWidget::SetFontSize(int32 s){
+    FontSize=s;
+    SynchronizeProperties();
+}
+
 void UInventoryItemWidget::SynchronizeProperties(){
     Super::SynchronizeProperties();
     if(WidgetSizeBox){
         WidgetSizeBox->SetHeightOverride(Size.Y);
         WidgetSizeBox->SetWidthOverride(Size.X);
     }
+    
+    FSlateFontInfo font;
+    if(ItemQuantity)
+        font=ItemQuantity->Font;
+    font.Size=FontSize;
+
+    if(ItemQuantity){
+        ItemQuantity->SetFont(font);
+    }
+    if(QuickActionIndex){
+        QuickActionIndex->SetFont(font);
+    }
+
+
+    
 }
 
 void UInventoryItemWidget::OnClick(){

@@ -67,6 +67,9 @@ public:
 	void SetClassItem(int Class, int i, UTexture2D* icon);
 	void SetClassItemsNum(int Class, int i, UTexture2D* defaultIcon);
 
+	void StartBuildingMode();
+	void EndBuildingMode();
+	
 	void OpenMenu();
 	void CloseMenu();
 

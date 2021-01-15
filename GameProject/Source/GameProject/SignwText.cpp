@@ -52,7 +52,7 @@ void ASignwText::OnInteract_Implementation(AActor* Caller){
                 UInputStateMachine* InputStateMachine=Actor->FindComponentByClass<UInputStateMachine>();
                 if(InputStateMachine){
 					InputStateMachine->BeforeUI=InputStateMachine->ActState;
-					InputStateMachine->ActState=UInputStateMachine::State::UI_Dialog;
+					InputStateMachine->ActState=InputState::UI_Dialog;
 				}    
             }
 		}

@@ -19,7 +19,7 @@ AGameProjectCharacter::AGameProjectCharacter()
 {
 	// Set size for collision capsule
 	GetCapsuleComponent()->InitCapsuleSize(42.f, 96.0f);
-
+	/*
 	// set our turn rates for input
 	BaseTurnRate = 45.f;
 	BaseLookUpRate = 45.f;
@@ -34,7 +34,7 @@ AGameProjectCharacter::AGameProjectCharacter()
 	GetCharacterMovement()->RotationRate = FRotator(0.0f, 540.0f, 0.0f); // ...at this rotation rate
 	GetCharacterMovement()->JumpZVelocity = 600.f;
 	GetCharacterMovement()->AirControl = 0.2f;
-
+	*/
 	// Create a camera boom (pulls in towards the player if there is a collision)
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
 	CameraBoom->SetupAttachment(RootComponent);
@@ -64,6 +64,7 @@ AGameProjectCharacter::AGameProjectCharacter()
 	Inventory->Size=PlayerInventorySize;
 	
 	InputStateMachine = CreateDefaultSubobject<UInputStateMachine>(TEXT("InputStateMachine"));
+	InputStateMachine->OnQuickSlotChanged.AddDynamic(this,&AGameProjectCharacter::OnQuickSlotChange);
 
 	OverlappedInteractActors=0;
 	FocusedActor=nullptr;
@@ -85,17 +86,19 @@ void AGameProjectCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 {
 	// Set up gameplay key bindings
 	check(PlayerInputComponent);
-
+/*
 	PlayerInputComponent->BindAction("Jump", IE_Pressed, this, &AGameProjectCharacter::Jump);
 	PlayerInputComponent->BindAction("Jump", IE_Released, this, &AGameProjectCharacter::StopJumping);
-
+*/
 	//Akcje
 	PlayerInputComponent->BindAction("Interact", IE_Pressed,  this, &AGameProjectCharacter::Interact);
 	PlayerInputComponent->BindAction("Crafting", IE_Pressed,  this, &AGameProjectCharacter::OpenCrafting);
 	
 	//PlayerInputComponent->BindAction("BuildingMenu", IE_Pressed,  this, &AGameProjectCharacter::OpenRadialMenu);
 	//PlayerInputComponent->BindAction("BuildingMenu", IE_Released,  this, &AGameProjectCharacter::CloseRadialMenu);
-
+	PlayerInputComponent->BindAxis("TurnRate", this, &AGameProjectCharacter::TurnAtRate);
+	PlayerInputComponent->BindAxis("LookUpRate", this, &AGameProjectCharacter::LookUpAtRate);
+/*
 	PlayerInputComponent->BindAxis("MoveForward", this, &AGameProjectCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AGameProjectCharacter::MoveRight);
 
@@ -103,9 +106,7 @@ void AGameProjectCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 	// "turn" handles devices that provide an absolute delta, such as a mouse.
 	// "turnrate" is for devices that we choose to treat as a rate of change, such as an analog joystick
 	PlayerInputComponent->BindAxis("Turn", this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis("TurnRate", this, &AGameProjectCharacter::TurnAtRate);
 	PlayerInputComponent->BindAxis("LookUp", this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis("LookUpRate", this, &AGameProjectCharacter::LookUpAtRate);
 
 	// handle touch devices
 	PlayerInputComponent->BindTouch(IE_Pressed, this, &AGameProjectCharacter::TouchStarted);
@@ -113,6 +114,7 @@ void AGameProjectCharacter::SetupPlayerInputComponent(class UInputComponent* Pla
 
 	// VR headset functionality
 	PlayerInputComponent->BindAction("ResetVR", IE_Pressed, this, &AGameProjectCharacter::OnResetVR);
+*/
 }
 
 void AGameProjectCharacter::BeginPlay(){
@@ -127,16 +129,16 @@ void AGameProjectCharacter::BeginPlay(){
 }
 
 void AGameProjectCharacter::Jump(){
-	if(InputStateMachine->ActState==UInputStateMachine::State::PlayerInput ||
-	   InputStateMachine->ActState==UInputStateMachine::State::Building)
+	if(InputStateMachine->ActState==InputState::PlayerInput ||
+	   InputStateMachine->ActState==InputState::Building)
 	{
 		Super::Jump();
 	}
 	
 }
 void AGameProjectCharacter::StopJumping(){
-	if(InputStateMachine->ActState==UInputStateMachine::State::PlayerInput ||
-	   InputStateMachine->ActState==UInputStateMachine::State::Building)
+	if(InputStateMachine->ActState==InputState::PlayerInput ||
+	   InputStateMachine->ActState==InputState::Building)
 	{
 		Super::StopJumping();
 	}
@@ -171,8 +173,8 @@ void AGameProjectCharacter::LookUpAtRate(float Rate)
 
 void AGameProjectCharacter::MoveForward(float Value)
 {
-	if(InputStateMachine->ActState==UInputStateMachine::State::PlayerInput ||
-	   InputStateMachine->ActState==UInputStateMachine::State::Building){
+	if(InputStateMachine->ActState==InputState::PlayerInput ||
+	   InputStateMachine->ActState==InputState::Building){
 		if ((Controller != NULL) && (Value != 0.0f))
 		{
 			// find out which way is forward
@@ -188,8 +190,8 @@ void AGameProjectCharacter::MoveForward(float Value)
 
 void AGameProjectCharacter::MoveRight(float Value)
 {
-	if(InputStateMachine->ActState==UInputStateMachine::State::PlayerInput ||
-	   InputStateMachine->ActState==UInputStateMachine::State::Building){
+	if(InputStateMachine->ActState==InputState::PlayerInput ||
+	   InputStateMachine->ActState==InputState::Building){
 		if ( (Controller != NULL) && (Value != 0.0f) )
 		{
 			// find out which way is right
@@ -321,9 +323,9 @@ void AGameProjectCharacter::TraceLineInteract(){
 }
 
 void AGameProjectCharacter::OpenCloseInventory(){
-	if(InputStateMachine->ActState==UInputStateMachine::State::PlayerInput ||
-	   InputStateMachine->ActState==UInputStateMachine::State::Building ||
-	   InputStateMachine->ActState==UInputStateMachine::State::UI_CraftInv)
+	if(InputStateMachine->ActState==InputState::PlayerInput ||
+	   InputStateMachine->ActState==InputState::Building ||
+	   InputStateMachine->ActState==InputState::UI_CraftInv)
 	{
 		if(!IsInvOpen){
 			AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
@@ -331,10 +333,11 @@ void AGameProjectCharacter::OpenCloseInventory(){
 				InGameHUD->ActiveUIElems++;
 				InGameHUD->ChangeInputType();
 				InGameHUD->GetPlayerInventoryWidget()->Update(Inventory);
+				InGameHUD->GetQuickSlotsWidget()->HideQuickSlots();
 				InGameHUD->GetPlayerInventoryWidget()->ShowInventory();
-				if(InputStateMachine->ActState!=UInputStateMachine::State::UI_CraftInv){
+				if(InputStateMachine->ActState!=InputState::UI_CraftInv){
 					InputStateMachine->BeforeUI=InputStateMachine->ActState;
-					InputStateMachine->ActState=UInputStateMachine::State::UI_CraftInv;
+					InputStateMachine->ActState=InputState::UI_CraftInv;
 				}
 			}
 			IsInvOpen=true;
@@ -346,6 +349,7 @@ void AGameProjectCharacter::OpenCloseInventory(){
 				if(InGameHUD->ActiveUIElems<0)
 					InGameHUD->ActiveUIElems=0;
 				InGameHUD->ChangeInputType();
+				InGameHUD->GetQuickSlotsWidget()->ShowQuickSlots();
 				InGameHUD->GetPlayerInventoryWidget()->HideInventory();
 			}
 			IsInvOpen=false;
@@ -360,20 +364,20 @@ void AGameProjectCharacter::UseItem(class UItemBase* Item){
 }
 
 void AGameProjectCharacter::OpenCrafting(){
-	if(InputStateMachine->ActState==UInputStateMachine::State::PlayerInput ||
-	   InputStateMachine->ActState==UInputStateMachine::State::Building ||
-	   InputStateMachine->ActState==UInputStateMachine::State::UI_CraftInv)
+	if(InputStateMachine->ActState==InputState::PlayerInput ||
+	   InputStateMachine->ActState==InputState::Building ||
+	   InputStateMachine->ActState==InputState::UI_CraftInv)
 	{
 		if(!IsCraftOpen){
 			AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
 			if(InGameHUD){
 				InGameHUD->ActiveUIElems++;
 				InGameHUD->ChangeInputType();
-				InGameHUD->GetCraftingWidget()->Update(Inventory);
+				InGameHUD->GetCraftingWidget()->Update();
 				InGameHUD->GetCraftingWidget()->ShowCrafting();
-				if(InputStateMachine->ActState!=UInputStateMachine::State::UI_CraftInv){
+				if(InputStateMachine->ActState!=InputState::UI_CraftInv){
 					InputStateMachine->BeforeUI=InputStateMachine->ActState;
-					InputStateMachine->ActState=UInputStateMachine::State::UI_CraftInv;
+					InputStateMachine->ActState=InputState::UI_CraftInv;
 				}
 			}
 			IsCraftOpen=true;
@@ -393,14 +397,21 @@ void AGameProjectCharacter::OpenCrafting(){
 }
 
 void AGameProjectCharacter::OnUpdateInventory(){
-	if(InputStateMachine->ActState==UInputStateMachine::State::UI_CraftInv){
-		AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
-		if(InGameHUD){
-			InGameHUD->GetCraftingWidget()->Update(Inventory);
-			InGameHUD->GetPlayerInventoryWidget()->Update(Inventory);
-			if(GEngine)
-				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "InvUpdated");
-		}
+	AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+	if(InGameHUD){
+		InGameHUD->GetCraftingWidget()->Update();
+		InGameHUD->GetQuickSlotsWidget()->Update();
+		InGameHUD->GetPlayerInventoryWidget()->Update(Inventory);
+		if(GEngine)
+			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "InvUpdated");
+	}
+	InputStateMachine->RefreshEquippedItem();
+}
+
+void AGameProjectCharacter::OnQuickSlotChange(){
+	AInGameHUD* InGameHUD=Cast<AInGameHUD>(GetWorld()->GetFirstPlayerController()->GetHUD());
+	if(InGameHUD){
+		InGameHUD->GetQuickSlotsWidget()->Update();
 	}
 }
 
@@ -423,7 +434,7 @@ void AGameProjectCharacter::ToogleBuildMode(){
 }*/
 
 void AGameProjectCharacter::PlaceBuilding(){
-	if(InputStateMachine->ActState==UInputStateMachine::State::Building){
+	if(InputStateMachine->ActState==InputState::Building){
 		if(PlaceLocation.X !=0 || PlaceLocation.Y!=0 || PlaceLocation.Z!=0)
 			GetWorld()->SpawnActor(Building->GetClass(),&PlaceLocation,new FRotator(0,0,0),FActorSpawnParameters());
 	}//FTransform(FRotator(0,0,0),PlaceLocation,FVector(1,1,1,1))

@@ -4,7 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
+#include "InventoryComponent.h"
 #include "InputStateMachine.generated.h"
+
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FQuickSlotChanged);
+
+UENUM(BlueprintType)
+enum class InputState: uint8{PlayerInput, Building, UI_CraftInv, UI_Dialog, UI_BuildingMenu};
 
 
 UCLASS( ClassGroup=(Custom), meta=(BlueprintSpawnableComponent) )
@@ -20,8 +26,33 @@ protected:
 	virtual void BeginPlay() override;
 
 public:
-	enum class State{PlayerInput, Building, UI_CraftInv, UI_Dialog, UI_BuildingMenu};
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InputState")
+	InputState ActState;
+	InputState BeforeUI;
 
-	UInputStateMachine::State ActState;
-	UInputStateMachine::State BeforeUI;	
+	int32 EquippedQuickSlot;
+	UItemBase* LastEquippedItem;
+
+	void RefreshEquippedItem();
+
+	UFUNCTION()
+	void QuickSlot1();
+	UFUNCTION()
+	void QuickSlot2();
+	UFUNCTION()
+	void QuickSlot3();
+	UFUNCTION()
+	void QuickSlot4();
+	UFUNCTION()
+	void QuickSlot5();
+	UFUNCTION()
+	void QuickSlot6();
+
+	UFUNCTION()
+	void UseEquippedItem();
+
+	void UnequipItem();
+
+	UPROPERTY(BlueprintAssignable, Category="QuickSlots")
+	FQuickSlotChanged OnQuickSlotChanged;
 };

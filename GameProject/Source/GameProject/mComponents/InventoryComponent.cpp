@@ -55,9 +55,24 @@ bool UInventoryComponent::AddItem(class UItemBase* Item, int32 Index)
 {
 	if(!Items[Index]){
 		Items[Index]=Item;
+		Item->OwningInventory=this;
+		Item->World=GetWorld();
 		OnInventoryUpdated.Broadcast();
 		return true;
 	}
+	return false;
+}
+
+bool UInventoryComponent::RemoveItem(class UItemBase* Item){
+	for(int32 i=0;i<Size.X*Size.Y;i++){
+		if(Items[i]==Item){
+			Items[i]->ConditionalBeginDestroy();
+			Items[i]=nullptr;
+			OnInventoryUpdated.Broadcast();
+			return true;
+		}
+	}
+	OnInventoryUpdated.Broadcast();
 	return false;
 }
 
@@ -67,6 +82,12 @@ bool UInventoryComponent::RemoveItems(class UItemBase* Item, int32 Quantity){
 			if(Items[i]->IDName.EqualTo(Item->IDName,ETextComparisonLevel::Default)){
 				if(Quantity>=Items[i]->Quantity){
 					Quantity-=Items[i]->Quantity;
+					AActor* Player=GetOwner();
+					if(Player){
+						if(Player->FindComponentByClass<class UInputStateMachine>())
+							if(Player->FindComponentByClass<class UInputStateMachine>()->EquippedQuickSlot==i)
+								Player->FindComponentByClass<class UInputStateMachine>()->UnequipItem();
+					}
 					Items[i]->ConditionalBeginDestroy();
 					Items[i]=nullptr;
 				}
@@ -86,6 +107,8 @@ bool UInventoryComponent::RemoveItems(class UItemBase* Item, int32 Quantity){
 bool UInventoryComponent::RemoveItemFromSlot(int32 Index)
 {
 	if(Items[Index]){
+		Items[Index]->OwningInventory=nullptr;
+		Items[Index]->World=nullptr;
 		Items[Index]=nullptr;
 		OnInventoryUpdated.Broadcast();
 		return true;

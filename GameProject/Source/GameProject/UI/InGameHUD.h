@@ -14,6 +14,7 @@
 #include "PlayerInventoryWidget.h"
 #include "CraftingWidget.h"
 #include "RadialMenuWidget.h"
+#include "QuickSlotsWidget.h"
 
 #include "InGameHUD.generated.h"
 
@@ -57,6 +58,9 @@ public:
 
 	UPROPERTY(EditDefaultsOnly, Category="Widgets")
 	TSubclassOf<UUserWidget> RadialMenuWidgetClass;
+
+	UPROPERTY(EditDefaultsOnly, Category="Widgets")
+	TSubclassOf<UUserWidget> QuickSlotsWidgetClass;
 	
 	UMouseSlot* GetMouseSlot();
 	UDialogWidget* GetDialogWidget();
@@ -65,6 +69,7 @@ public:
 	class UPlayerInventoryWidget* GetPlayerInventoryWidget();
 	class UCraftingWidget* GetCraftingWidget();
 	URadialMenuWidget* GetRadialMenuWidget();
+	UQuickSlotsWidget* GetQuickSlotsWidget();
 private:
 	UPROPERTY()
 	UMouseSlot* mouseSlot;
@@ -77,5 +82,6 @@ private:
 	class UPlayerInventoryWidget* playerInventoryWidget;
 	class UCraftingWidget* craftingWidget;
 	URadialMenuWidget* radialMenuWidget;
+	UQuickSlotsWidget* quickSlotsWidget;
 	
 };

@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "Components/ActorComponent.h"
 #include "../Items/ItemBase.h"
+#include "InputStateMachine.h"
 #include "InventoryComponent.generated.h"
 
 DECLARE_DYNAMIC_MULTICAST_DELEGATE(FInventoryUpdated);
@@ -23,6 +24,7 @@ public:
 
 	bool AddItem(class UItemBase* Item);
 	bool AddItem(class UItemBase* Item, int32 Index);
+	bool RemoveItem(class UItemBase* Item);
 	bool RemoveItems(class UItemBase* Item, int32 Quantity);
 	bool RemoveItemFromSlot(int32 Index);
 

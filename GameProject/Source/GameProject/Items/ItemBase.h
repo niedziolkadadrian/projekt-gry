@@ -20,6 +20,7 @@ public:
 	
 	UPROPERTY(Transient)
 	class UWorld* World;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Item")
 	FText UseText;
 
@@ -54,8 +55,15 @@ public:
 	class UInventoryComponent* OwningInventory;
 
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Interaction")
-	void OnUse(class AGameProjectCharacter* Character);
-	virtual void OnUse_Implementation(class AGameProjectCharacter* Character) PURE_VIRTUAL(UItemBase, );
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Item")
+	void OnUse(class AActor* Character);
+	virtual void OnUse_Implementation(class AActor* Character) PURE_VIRTUAL(UItemBase, );
 	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Item")
+	void OnEquip(class AActor* Character);
+	virtual void OnEquip_Implementation(class AActor* Character) PURE_VIRTUAL(UItemBase, );
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Item")
+	void OnUnEquip(class AActor* Character);
+	virtual void OnUnEquip_Implementation(class AActor* Character) PURE_VIRTUAL(UItemBase, );
 };

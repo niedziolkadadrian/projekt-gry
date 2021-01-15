@@ -37,6 +37,11 @@ void UCraftWindowWidget::Update(UItemBase* Item){
         if(Item->Icon)
             CraftItem->ItemImage->SetBrushFromTexture(Item->Icon,false);
         CraftItem->ItemImage->SetVisibility(ESlateVisibility::Visible);
+        CraftItem->ItemName=Item->ItemDisplayName;
+        CraftItem->ItemDescription=Item->ItemDescription;
+    }
+    if(CraftItemName){
+        CraftItemName->SetText(Item->ItemDisplayName);
     }
     
     if(IngredientsBox)
@@ -56,37 +61,49 @@ void UCraftWindowWidget::Update(UItemBase* Item){
                 if(Ingredient->Icon)
                     elem->ItemImage->SetBrushFromTexture(Ingredient->Icon,false);
             elem->ItemImage->SetVisibility(ESlateVisibility::Visible);
-            elem->SetSize(FVector2D(32.0f,32.0f));
+            elem->SetSize(FVector2D(48.0f,48.0f));
         }
     }
-    RefreshIngredients(ActualItem);
+    RefreshIngredients();
 }
 
-void UCraftWindowWidget::RefreshIngredients(UItemBase* Item){
+void UCraftWindowWidget::RefreshIngredients(){
     AActor* Player=Cast<AActor>(GetWorld()->GetFirstPlayerController()->GetPawn());
     UInventoryComponent* PlayerInventory=nullptr;
     bool sufRes=true;
     if(Player)
         PlayerInventory=Player->FindComponentByClass<UInventoryComponent>();
-    if(PlayerInventory){
-        for(int i=0;i<Item->CraftIngredients.Num();i++){
-            UInventoryItemWidget* elem=nullptr;
-            if(IngredientsBox)
-                elem=Cast<UInventoryItemWidget>(IngredientsBox->GetChildAt(i));
-            
-            if(elem){
-                if(i<Item->CraftIngredientsQuantity.Num() && i<Item->CraftIngredients.Num()){
-                    UItemBase* Ingredient=Item->CraftIngredients[i].GetDefaultObject();
-                    if(Ingredient){
-                        if(GEngine)
-                            GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Liczba jablek %d"),PlayerInventory->GetItemQuantity(Ingredient)));
-                        
-                        if(PlayerInventory->GetItemQuantity(Ingredient)>=Item->CraftIngredientsQuantity[i]){
-                            elem->ItemImageBorder->SetBrushColor(FLinearColor(.0f,1.0f,.0f,.8f));
-                        }
-                        else{
-                            elem->ItemImageBorder->SetBrushColor(FLinearColor(1.0f,.0f,.0f,.8f));
-                            sufRes=false;
+    if(ActualItem){
+        if(PlayerInventory){
+            for(int i=0;i<ActualItem->CraftIngredients.Num();i++){
+                UInventoryItemWidget* elem=nullptr;
+                if(IngredientsBox)
+                    elem=Cast<UInventoryItemWidget>(IngredientsBox->GetChildAt(i));
+                
+                if(elem){
+                    if(i<ActualItem->CraftIngredientsQuantity.Num() && i<ActualItem->CraftIngredients.Num()){
+                        UItemBase* Ingredient=ActualItem->CraftIngredients[i].GetDefaultObject();
+                        if(Ingredient){
+                            if(GEngine)
+                                GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Liczba jablek %d"),PlayerInventory->GetItemQuantity(Ingredient)));
+                            
+                            elem->SetFontSize(8.0f);
+                            elem->ItemQuantity->SetText(FText::FromString("/"+FString::FromInt(ActualItem->CraftIngredientsQuantity[i])));
+                            elem->ItemQuantityBox->SetVisibility(ESlateVisibility::Visible);
+                            
+                            elem->QuickActionIndex->SetText(FText::FromString(FString::FromInt(PlayerInventory->GetItemQuantity(Ingredient))));
+                            elem->QuickActionBox->SetVisibility(ESlateVisibility::Visible);
+
+                            elem->ItemName=Ingredient->ItemDisplayName;
+                            elem->ItemDescription=Ingredient->ItemDescription;
+                            
+                            if(PlayerInventory->GetItemQuantity(Ingredient)>=ActualItem->CraftIngredientsQuantity[i]){
+                                elem->ItemImageBorder->SetBrushColor(FLinearColor(.0f,0.8f,.0f,.5f));
+                            }
+                            else{
+                                elem->ItemImageBorder->SetBrushColor(FLinearColor(0.8f,.0f,.0f,.5f));
+                                sufRes=false;
+                            }
                         }
                     }
                 }
@@ -141,6 +158,6 @@ void UCraftWindowWidget::OnCraftClicked(){
             if(GEngine)
                 GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, FString::Printf(TEXT("NotCrafted")));
         }
-        RefreshIngredients(ActualItem);
+        RefreshIngredients();
     }
 }

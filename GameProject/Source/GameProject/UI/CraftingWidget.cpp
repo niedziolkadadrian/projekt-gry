@@ -25,13 +25,15 @@ void UCraftingWidget::ShowCrafting(){
 }
 
 void UCraftingWidget::HideCrafting(){
+    CloseSubmenus();
     if(CraftingCanva){
         CraftingCanva->SetVisibility(ESlateVisibility::Hidden);
     }
 }
 
-void UCraftingWidget::Update(UInventoryComponent* Inventory){
-
+void UCraftingWidget::Update(){
+    if(CraftWindowOpened)
+        CraftWindow->RefreshIngredients();
 }
 
 void UCraftingWidget::SynchronizeProperties(){
@@ -76,15 +78,9 @@ void UCraftingWidget::OnSynchronizeProperties_Implementation(){
 
 void UCraftingWidget::OnCraftingItemClick(int32 index){
     //Zamykanie poprzednich
-    if(openedType!=-1){
-        if(TypesBox){
-            UCraftingTypeWidget* elem=Cast<UCraftingTypeWidget>(TypesBox->GetChildAt(openedType));
-            if(elem){
-                elem->HideCraftingType();
-            }
-        }  
-    }
-    UItemBase* Item=CraftItems[index].GetDefaultObject();//NewObject<UItemBase>(this,CraftItems[index]);
+    CloseSubmenus();
+
+    UItemBase* Item=CraftItems[index].GetDefaultObject();
     if(Item){
         CraftWindow->ShowCraftWindow();
         CraftWindow->Update(Item);
@@ -94,8 +90,17 @@ void UCraftingWidget::OnCraftingItemClick(int32 index){
 }
 
 void UCraftingWidget::OnCraftingTypeClick(int32 index){
-    
     //Zamykanie poprzednich
+    CloseSubmenus();
+    //Otwieranie
+    UCraftingTypeWidget* typeWidget=Cast<UCraftingTypeWidget>(TypesBox->GetChildAt(index));
+    if(typeWidget){
+        typeWidget->ShowCraftingType();
+        openedType=index;
+    }  
+}
+
+void UCraftingWidget::CloseSubmenus(){
     if(openedType!=-1){
         if(TypesBox){
             UCraftingTypeWidget* elem=Cast<UCraftingTypeWidget>(TypesBox->GetChildAt(openedType));
@@ -108,10 +113,4 @@ void UCraftingWidget::OnCraftingTypeClick(int32 index){
         CraftWindow->HideCraftWindow();
         CraftWindowOpened=false;
     }
-    //Otwieranie
-    UCraftingTypeWidget* typeWidget=Cast<UCraftingTypeWidget>(TypesBox->GetChildAt(index));
-    if(typeWidget){
-        typeWidget->ShowCraftingType();
-        openedType=index;
-    }  
 }

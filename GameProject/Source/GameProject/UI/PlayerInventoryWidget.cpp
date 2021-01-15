@@ -47,7 +47,7 @@ void UPlayerInventoryWidget::Update(UInventoryComponent* Inventory){
             elem->OnInventoryItemClicked.AddDynamic(this, &UPlayerInventoryWidget::OnInvItemClicked);
             elem->QuickActionBox->SetVisibility(ESlateVisibility::Visible);
             elem->QuickActionIndex->SetText(FText::FromString(FString::FromInt(i+1)));
-            UItemBase* Item=Inventory->Items[0*9+i];
+            UItemBase* Item=Inventory->Items[i];
             if(Item){
                 if(Item->Icon)
                     elem->ItemImage->SetBrushFromTexture(Item->Icon,false);
@@ -55,7 +55,9 @@ void UPlayerInventoryWidget::Update(UInventoryComponent* Inventory){
                 if(Item->Quantity>1){
                     elem->ItemQuantityBox->SetVisibility(ESlateVisibility::Visible);
                     elem->ItemQuantity->SetText(FText::FromString(FString::FromInt(Item->Quantity)));
-                }   
+                }
+                elem->ItemName=Item->ItemDisplayName;
+                elem->ItemDescription=Item->ItemDescription; 
             }
         }     
     }
@@ -76,20 +78,22 @@ void UPlayerInventoryWidget::Update(UInventoryComponent* Inventory){
                     if(Item->Quantity>1){
                         elem->ItemQuantityBox->SetVisibility(ESlateVisibility::Visible);
                         elem->ItemQuantity->SetText(FText::FromString(FString::FromInt(Item->Quantity)));
-                    }    
+                    }
+                    elem->ItemName=Item->ItemDisplayName;
+                    elem->ItemDescription=Item->ItemDescription;    
                 }
             }
         }
     }
 
-    if(InvWrap){
+    /*if(InvWrap){
         int32 posX;
         int32 posY;
         GetWorld()->GetWorld()->GetFirstPlayerController()->GetViewportSize(posX,posY);
         FVector2D pos((float)posX,(float)posY);
         pos/=2;
         Cast<UCanvasPanelSlot>(InvWrap->Slot)->SetPosition(pos);
-    }
+    }*/
 }
 
 void UPlayerInventoryWidget::OnInvItemClicked(int32 x, int32 y){
