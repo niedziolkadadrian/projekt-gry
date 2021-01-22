@@ -111,23 +111,22 @@ void UPlayerInventoryWidget::OnInvItemClicked(int32 x, int32 y){
                 InGameHUD->GetMouseSlot()->RemoveItem();
                 InGameHUD->GetMouseSlot()->AddItem(currentInventory->Items[y*width+x], InventoryItemWidgetClass);
                 if(currentInventory->RemoveItemFromSlot(y*width+x)){
-                     currentInventory->AddItem(pom,y*width+x);
+                     currentInventory->AddItemIndx(pom,y*width+x);
                 }
             }
-            if(GEngine)
-		    GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, "kliknieto");
         }
         else{
             if(!InGameHUD->GetMouseSlot()->isEmpty()){
                 UItemBase* pom=InGameHUD->GetMouseSlot()->GetItem();
-                currentInventory->AddItem(pom,y*width+x);
+                currentInventory->AddItemIndx(pom,y*width+x);
                 InGameHUD->GetMouseSlot()->RemoveItem();
             }
         }   
     }
 
-    if(GEngine)
+    /*if(GEngine)
 		GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Green, FString::Printf(TEXT("Kliknieto %d, %d"),x,y));
+    */
 }
 
 void UPlayerInventoryWidget::OnThrowClicked(){

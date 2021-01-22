@@ -30,16 +30,16 @@ void AInGameHUD::BeginPlay(){
             hudWidgetCanva->AddChildToCanvas(hintWidget);
         }
     }
-    if(InventoryWidgetClass){
-        inventoryWidget = CreateWidget<UInventoryWidget>(hudWidget,InventoryWidgetClass);
-        if(inventoryWidget){
-            hudWidgetCanva->AddChildToCanvas(inventoryWidget);
-        }
-    }
     if(PlayerInventoryWidgetClass){
         playerInventoryWidget = CreateWidget<UPlayerInventoryWidget>(hudWidget,PlayerInventoryWidgetClass);
         if(playerInventoryWidget){
             hudWidgetCanva->AddChildToCanvas(playerInventoryWidget);
+        }
+    }
+    if(InventoryWidgetClass){
+        inventoryWidget = CreateWidget<UInventoryWidget>(hudWidget,InventoryWidgetClass);
+        if(inventoryWidget){
+            hudWidgetCanva->AddChildToCanvas(inventoryWidget);
         }
     }
     if(CraftingWidgetClass){
@@ -58,6 +58,12 @@ void AInGameHUD::BeginPlay(){
         quickSlotsWidget = CreateWidget<UQuickSlotsWidget>(hudWidget,QuickSlotsWidgetClass);
         if(quickSlotsWidget){
             hudWidgetCanva->AddChildToCanvas(quickSlotsWidget);
+        }
+    }
+    if(ActionCircleWidgetClass){
+        actionCircleWidget = CreateWidget<UActionCircleWidget>(hudWidget,ActionCircleWidgetClass);
+        if(actionCircleWidget){
+            hudWidgetCanva->AddChildToCanvas(actionCircleWidget);
         }
     }
 }
@@ -146,6 +152,12 @@ URadialMenuWidget* AInGameHUD::GetRadialMenuWidget(){
 UQuickSlotsWidget* AInGameHUD::GetQuickSlotsWidget(){
     if(quickSlotsWidget)
         return quickSlotsWidget;
+    return nullptr;
+}
+
+UActionCircleWidget* AInGameHUD::GetActionCircleWidget(){
+    if(actionCircleWidget)
+        return actionCircleWidget;
     return nullptr;
 }
 

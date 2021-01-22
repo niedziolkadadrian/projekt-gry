@@ -64,7 +64,12 @@ void UMouseSlot::DropItem(){
         loc+=przes*100;
         APickableItem* pickItem= GetWorld()->SpawnActor<APickableItem>(loc,FRotator(0,0,0),FActorSpawnParameters());
         pickItem->SetItem(Item->GetClass(),Item);
+        FRotator Rot=przes.Rotation();
+        Rot.Roll=90;
+        Rot.Pitch=0;
+        pickItem->SetActorRotation(Rot,ETeleportType::TeleportPhysics);
         pickItem->Mesh->SetSimulatePhysics(true); 
+        pickItem->Mesh->SetMassOverrideInKg(NAME_None, Item->Weight, true);
         RemoveItem(); //remove from mouse slot     
     }
 }

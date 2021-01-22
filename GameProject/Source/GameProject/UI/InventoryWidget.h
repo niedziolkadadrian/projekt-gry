@@ -6,6 +6,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Runtime/UMG/Public/UMG.h"
 #include "../mComponents/InventoryComponent.h"
+#include "InGameHUD.h"
 #include "InventoryItemWidget.h"
 #include "InventoryWidget.generated.h"
 
@@ -21,14 +22,31 @@ public:
 
 	virtual void NativeConstruct() override;
 
+	UFUNCTION(BlueprintCallable)
 	void ShowInventory();
+	UFUNCTION(BlueprintCallable)
 	void HideInventory();
+	UFUNCTION(BlueprintCallable)
 	void Update(UInventoryComponent* Inventory);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
 	class UCanvasPanel* InvCanva;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	class USizeBox* InvWrap;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	class UTextBlock* InvName;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))
+	class UUniformGridPanel* InventorySlots;
+
 	UPROPERTY(EditDefaultsOnly, Category="Inventory")
 	TSubclassOf<UUserWidget> InventoryItemWidgetClass;
-	
+
+	UFUNCTION()
+	void OnInvItemClicked(int32 x, int32 y);
+
+private:
+	UInventoryComponent* currentInventory;	
 };

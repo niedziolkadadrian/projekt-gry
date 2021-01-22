@@ -30,6 +30,7 @@ void UInputStateMachine::BeginPlay()
 			Actor->InputComponent->BindAction("QuickSlot6", IE_Pressed,  this, &UInputStateMachine::QuickSlot6);
 
 			Actor->InputComponent->BindAction("UseEquippedItem", IE_Pressed,  this, &UInputStateMachine::UseEquippedItem);
+			Actor->InputComponent->BindAction("UseEquippedItem", IE_Released,  this, &UInputStateMachine::StopUseEquippedItem);
 		}	
 	}
 }
@@ -127,6 +128,22 @@ void UInputStateMachine::UseEquippedItem(){
 			if(Inventory){
 				if(Inventory->Items[EquippedQuickSlot]){
 					Inventory->Items[EquippedQuickSlot]->OnUse(Player);
+				}
+			}
+		}
+	}
+}
+
+void UInputStateMachine::StopUseEquippedItem(){
+	if(ActState==InputState::PlayerInput ||
+	   ActState==InputState::Building)
+	{
+		AActor* Player=GetOwner();
+		if(Player){
+			UInventoryComponent* Inventory=Player->FindComponentByClass<UInventoryComponent>();
+			if(Inventory){
+				if(Inventory->Items[EquippedQuickSlot]){
+					Inventory->Items[EquippedQuickSlot]->OnStopUse(Player);
 				}
 			}
 		}

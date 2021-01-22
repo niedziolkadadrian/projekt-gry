@@ -45,9 +45,10 @@ public:
 
 	UFUNCTION(BluePrintCallable, Category="Item")
 	void SetItem(TSubclassOf<UItemBase> itmClass,UItemBase* itm);
-private:
-	UPROPERTY()
+
+	UPROPERTY(BlueprintReadOnly)
 	UItemBase* Item;
+private:
 	bool ToDestroy;
 
 };

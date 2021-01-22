@@ -10,4 +10,5 @@ UItemBase::UItemBase()
     StackSize=1;
     Quantity=1;
     OwningInventory=nullptr;
+    Weight=100.f;
 }

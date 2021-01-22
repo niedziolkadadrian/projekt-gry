@@ -38,6 +38,9 @@ public:
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Item", meta=(MultiLine=true))
 	FText ItemDescription;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Item")
+	float Weight;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category="Item")
 	TArray<TSubclassOf<UItemBase>> CraftIngredients;
@@ -58,6 +61,10 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Item")
 	void OnUse(class AActor* Character);
 	virtual void OnUse_Implementation(class AActor* Character) PURE_VIRTUAL(UItemBase, );
+	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Item")
+	void OnStopUse(class AActor* Character);
+	virtual void OnStopUse_Implementation(class AActor* Character) PURE_VIRTUAL(UItemBase, );
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable, Category="Item")
 	void OnEquip(class AActor* Character);

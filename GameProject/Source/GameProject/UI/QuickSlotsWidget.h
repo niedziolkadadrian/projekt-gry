@@ -26,8 +26,11 @@ public:
 
 	virtual void NativeConstruct() override;
 
+	UFUNCTION(BlueprintCallable)
 	void ShowQuickSlots();
+	UFUNCTION(BlueprintCallable)
 	void HideQuickSlots();
+	UFUNCTION(BlueprintCallable)
 	void Update();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))

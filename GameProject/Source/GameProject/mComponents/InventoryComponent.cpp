@@ -51,7 +51,7 @@ bool UInventoryComponent::AddItem(class UItemBase* Item)
 	OnInventoryUpdated.Broadcast();
 	return false;
 }
-bool UInventoryComponent::AddItem(class UItemBase* Item, int32 Index)
+bool UInventoryComponent::AddItemIndx(class UItemBase* Item, int32 Index)
 {
 	if(!Items[Index]){
 		Items[Index]=Item;

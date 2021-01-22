@@ -15,6 +15,7 @@
 #include "CraftingWidget.h"
 #include "RadialMenuWidget.h"
 #include "QuickSlotsWidget.h"
+#include "ActionCircleWidget.h"
 
 #include "InGameHUD.generated.h"
 
@@ -34,8 +35,11 @@ public:
 
 	virtual void Tick(float deltaSeconds) override;
 	
+	UPROPERTY(BlueprintReadWrite, Category="Widgets")
 	int32 ActiveUIElems;
+
 	bool UIControl;
+	UFUNCTION(BlueprintCallable)
 	void ChangeInputType();
 
 	UPROPERTY(EditDefaultsOnly, Category="Widgets")
@@ -62,14 +66,27 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category="Widgets")
 	TSubclassOf<UUserWidget> QuickSlotsWidgetClass;
 	
+	UPROPERTY(EditDefaultsOnly, Category="Widgets")
+	TSubclassOf<UUserWidget> ActionCircleWidgetClass;
+	
+	UFUNCTION(BlueprintCallable)
 	UMouseSlot* GetMouseSlot();
+	UFUNCTION(BlueprintCallable)
 	UDialogWidget* GetDialogWidget();
+	UFUNCTION(BlueprintCallable)
 	UHintWidget* GetHintWidget();
-	UInventoryWidget* GetInventoryWidget();
+	UFUNCTION(BlueprintCallable)
+	class UInventoryWidget* GetInventoryWidget();
+	UFUNCTION(BlueprintCallable)
 	class UPlayerInventoryWidget* GetPlayerInventoryWidget();
+	UFUNCTION(BlueprintCallable)
 	class UCraftingWidget* GetCraftingWidget();
+	UFUNCTION(BlueprintCallable)
 	URadialMenuWidget* GetRadialMenuWidget();
+	UFUNCTION(BlueprintCallable)
 	UQuickSlotsWidget* GetQuickSlotsWidget();
+	UFUNCTION(BlueprintCallable)
+	UActionCircleWidget* GetActionCircleWidget();
 private:
 	UPROPERTY()
 	UMouseSlot* mouseSlot;
@@ -78,10 +95,11 @@ private:
 	UCanvasPanel* hudWidgetCanva;
 	UDialogWidget* dialogWidget;
 	UHintWidget* hintWidget;
-	UInventoryWidget* inventoryWidget;
+	class UInventoryWidget* inventoryWidget;
 	class UPlayerInventoryWidget* playerInventoryWidget;
 	class UCraftingWidget* craftingWidget;
 	URadialMenuWidget* radialMenuWidget;
 	UQuickSlotsWidget* quickSlotsWidget;
+	UActionCircleWidget* actionCircleWidget;
 	
 };

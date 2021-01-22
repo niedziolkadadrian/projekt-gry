@@ -32,7 +32,7 @@ void UBuildingSystemComponent::BeginPlay()
 			Actor->InputComponent->BindAction("BuildingMenu", IE_Pressed,  this, &UBuildingSystemComponent::OpenMenu);
 			Actor->InputComponent->BindAction("BuildingMenu", IE_Released,  this, &UBuildingSystemComponent::CloseMenu);
 			
-			Actor->InputComponent->BindAction("PlaceBuilding", IE_Pressed,  this, &UBuildingSystemComponent::PlaceBuilding);
+			Actor->InputComponent->BindAction("PlaceBuilding", IE_Released,  this, &UBuildingSystemComponent::PlaceBuilding);
 			
 			Actor->InputComponent->BindAction("RotateBuilding", IE_Pressed,  this, &UBuildingSystemComponent::RotateBuilding);
 			Actor->InputComponent->BindAction("RotateBuilding", IE_Released,  this, &UBuildingSystemComponent::StopRotatingBuilding);
@@ -78,7 +78,26 @@ void UBuildingSystemComponent::TickComponent(float DeltaTime, ELevelTick TickTyp
 				if(GEngine)
       				GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("Budowanko bud bud")));
 	
-				GetWorld()->SpawnActor(Previews[ActiveBuilding].Get(), &PlaceLocation, &Rotation, FActorSpawnParameters());
+				ABuldingPreview* prev=Cast<ABuldingPreview>(PreviewModel);
+				if(prev){
+					if(GEngine)
+      					GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("PREVIEW")));
+					if(prev->canBePlaced){
+						if(GEngine)
+      						GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Blue, FString::Printf(TEXT("CAN BE PLACED")));
+						GetWorld()->SpawnActor(Buildings[ActiveBuilding].Get(), &PlaceLocation, &Rotation, FActorSpawnParameters());
+						//Remove resources
+						UInventoryComponent* Inventory=GetOwner()->FindComponentByClass<UInventoryComponent>();
+						if(Inventory){
+							for(int i=0;i<prev->BuildResources.Num();i++){
+								UItemBase* Ingredient=prev->BuildResources[i].GetDefaultObject();
+								if(Ingredient && i<prev->BuildResourcesQuantity.Num()){
+									Inventory->RemoveItems(Ingredient,prev->BuildResourcesQuantity[i]);
+								}
+							}
+						}
+					}
+				}
 				placeBuildingButtonClicked=false;
 			}	
 		}
@@ -295,7 +314,8 @@ void UBuildingSystemComponent::TraceLineBuild(){
 	FVector End=Loc+(Rot.Vector()*20000);
 
 	FCollisionQueryParams TraceParams;
-
+	TraceParams.AddIgnoredActor(GetOwner());
+	
 	bool IsHit=GetWorld()->LineTraceSingleByChannel(Hit,Loc,End,ECC_Visibility,TraceParams);
 	if(IsHit){
 		PlaceLocation=Hit.ImpactPoint;

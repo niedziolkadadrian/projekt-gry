@@ -18,8 +18,10 @@ public:
 	UHintWidget(const FObjectInitializer& ObjectInitializer);
 
 	virtual void NativeConstruct() override;
-
+	
+	UFUNCTION(BlueprintCallable)
 	void ShowHint(FText Value);
+	UFUNCTION(BlueprintCallable)
 	void HideHint();
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))

@@ -22,12 +22,18 @@ public:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
+	UFUNCTION(BlueprintCallable, Category="Inventory")
 	bool AddItem(class UItemBase* Item);
-	bool AddItem(class UItemBase* Item, int32 Index);
+	UFUNCTION(BlueprintCallable, Category="Inventory")
+	bool AddItemIndx(class UItemBase* Item, int32 Index);
+	UFUNCTION(BlueprintCallable, Category="Inventory")
 	bool RemoveItem(class UItemBase* Item);
+	UFUNCTION(BlueprintCallable, Category="Inventory")
 	bool RemoveItems(class UItemBase* Item, int32 Quantity);
+	UFUNCTION(BlueprintCallable, Category="Inventory")
 	bool RemoveItemFromSlot(int32 Index);
 
+	UFUNCTION(BlueprintCallable, Category="Inventory")
 	int32 GetItemQuantity(class UItemBase* Item);
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category="Items")

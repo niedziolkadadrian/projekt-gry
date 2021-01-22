@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "../UI/InGameHUD.h"
 #include "InputStateMachine.h"
+#include "../BuldingPreview.h"
+#include "InventoryComponent.h"
 #include "BuildingSystemComponent.generated.h"
 
 

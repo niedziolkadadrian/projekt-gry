@@ -29,3 +29,7 @@ void UFoodItem::OnEquip_Implementation(class AActor* Character){
 void UFoodItem::OnUnEquip_Implementation(class AActor* Character){
     
 }
+
+void UFoodItem::OnStopUse_Implementation(class AActor* Character){
+    
+}

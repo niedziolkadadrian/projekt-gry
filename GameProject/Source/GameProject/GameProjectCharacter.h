@@ -127,8 +127,6 @@ public:
 	UPROPERTY(EditAnywhere, BluePrintReadOnly, Category="Needs")
 	float Hunger;
 
-	UFUNCTION(BlueprintCallable, Category="Item")
-	void UseItem(class UItemBase* Item);
 
 	UPROPERTY(EditAnywhere, BluePrintReadOnly, Category="Building")
 	AActor* Building;

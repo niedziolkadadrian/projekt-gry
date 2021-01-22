@@ -21,7 +21,8 @@ public:
 	float HungerToRecover;
 
 protected:	
-	virtual void OnUse_Implementation(class AActor* Character);
-	virtual void OnEquip_Implementation(class AActor* Character);
-	virtual void OnUnEquip_Implementation(class AActor* Character);
+	virtual void OnUse_Implementation(class AActor* Character) override;
+	virtual void OnEquip_Implementation(class AActor* Character) override;
+	virtual void OnUnEquip_Implementation(class AActor* Character) override;
+	virtual void OnStopUse_Implementation(class AActor* Character) override;
 };

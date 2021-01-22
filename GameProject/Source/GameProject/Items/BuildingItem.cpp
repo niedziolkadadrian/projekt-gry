@@ -4,7 +4,7 @@
 #include "BuildingItem.h"
 
 void UBuildingItem::OnUse_Implementation(class AActor* Character){
-
+    Super::OnUse_Implementation(Character);
 }
 
 void UBuildingItem::OnEquip_Implementation(class AActor* Character){
@@ -20,4 +20,8 @@ void UBuildingItem::OnUnEquip_Implementation(class AActor* Character){
     if(BuildingComponent){
         BuildingComponent->EndBuildingMode();
     }
+}
+
+void UBuildingItem::OnStopUse_Implementation(class AActor* Character){
+    
 }

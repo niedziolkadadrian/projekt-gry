@@ -28,6 +28,7 @@ protected:
 public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "InputState")
 	InputState ActState;
+	UPROPERTY(BlueprintReadWrite, Category = "InputState")
 	InputState BeforeUI;
 
 	int32 EquippedQuickSlot;
@@ -50,6 +51,8 @@ public:
 
 	UFUNCTION()
 	void UseEquippedItem();
+	UFUNCTION()
+	void StopUseEquippedItem();
 
 	void UnequipItem();
 

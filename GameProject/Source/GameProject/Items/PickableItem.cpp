@@ -58,7 +58,6 @@ void APickableItem::SetItem(TSubclassOf<UItemBase> itmClass,UItemBase* itm)
 		if(itmClass){
 			this->ItemClass=itmClass;
 			Item = NewObject<UItemBase>(GetWorld(),ItemClass);
-			Item->Quantity=60;
    		}
 	}
 	if(itm && itmClass){

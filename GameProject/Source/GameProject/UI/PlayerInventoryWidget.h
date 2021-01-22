@@ -24,8 +24,11 @@ public:
 
 	virtual void NativeConstruct() override;
 
+	UFUNCTION(BlueprintCallable)
 	void ShowInventory();
+	UFUNCTION(BlueprintCallable)
 	void HideInventory();
+	UFUNCTION(BlueprintCallable)
 	void Update(UInventoryComponent* Inventory);
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, meta=(BindWidget))

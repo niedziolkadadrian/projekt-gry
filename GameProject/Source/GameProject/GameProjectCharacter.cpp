@@ -209,7 +209,7 @@ void AGameProjectCharacter::MoveRight(float Value)
 void AGameProjectCharacter::Interact(){
 	if(OverlappedInteractActors && FocusedActor){
 		IInteractInterface* InteractInt=Cast<IInteractInterface>(FocusedActor);
-		if(InteractInt && AActor::IsOverlappingActor(FocusedActor)){	//jeżeli ma on InteractInterface
+		if(InteractInt && AActor::IsOverlappingActor(FocusedActor) && !IsInvOpen){	//jeżeli ma on InteractInterface
 			InteractInt->Execute_OnInteract(FocusedActor, this);
 		}
 		else{		//jeżeli nie ma InteractInterface lub jestem poza zasięgiem
@@ -230,6 +230,9 @@ class UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, con
 				if(!GetWorld()->GetTimerManager().IsTimerActive(LTraceTimerHandle))
 					GetWorld()->GetTimerManager().SetTimer(LTraceTimerHandle, this, &AGameProjectCharacter::TraceLineInteract,0.1f,true);
 			}
+			if(GEngine)
+      			GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Yellow, FString::Printf(TEXT("Interact")));
+
 			OverlappedInteractActors++;
 		}
 	}
@@ -269,6 +272,7 @@ void AGameProjectCharacter::TraceLineInteract(){
 	FVector End=Loc+(Rot.Vector()*2000);
 
 	FCollisionQueryParams TraceParams;
+	TraceParams.AddIgnoredActor(this);
 
 	bool IsHit=GetWorld()->LineTraceSingleByChannel(Hit,Loc,End,ECC_Visibility,TraceParams);
 
@@ -354,12 +358,6 @@ void AGameProjectCharacter::OpenCloseInventory(){
 			}
 			IsInvOpen=false;
 		}
-	}
-}
-
-void AGameProjectCharacter::UseItem(class UItemBase* Item){
-	if(Item){
-		Item->OnUse(this);
 	}
 }
 
